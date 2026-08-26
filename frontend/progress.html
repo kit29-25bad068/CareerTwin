@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career Memory & Progress - CareerTwin AI</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <div class="page-container">
+        <!-- Header -->
+        <div class="card card-glow" style="margin-bottom: 2rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <div>
+              <div class="badge badge-emerald" style="margin-bottom:0.4rem;">Historical Growth Tracking</div>
+              <h1 style="font-size: 1.85rem; margin-bottom: 0.25rem;">Career Memory Engine</h1>
+              <p style="font-size: 0.95rem; color: var(--text-secondary);">
+                Track authentic score trajectories and skill growth over time across all your mock interview sessions.
+              </p>
+            </div>
+            <a href="/interview.html" class="btn btn-cyan btn-md">🎙️ Practice New Interview</a>
+          </div>
+        </div>
+
+        <!-- Historical Trend Chart -->
+        <div class="card" style="margin-bottom: 2rem;">
+          <div class="card-header">
+            <div class="card-title">📈 Longitudinal Performance Trajectory</div>
+            <span id="history-sessions-badge" class="badge badge-primary">0 Sessions</span>
+          </div>
+          <div style="height: 340px; position: relative;">
+            <canvas id="career-memory-chart"></canvas>
+          </div>
+          <div id="career-memory-narrative" style="margin-top:1.25rem; padding:0.85rem 1rem; background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:var(--radius-md); font-size:0.88rem; color:var(--text-secondary);">
+            Loading performance trends...
+          </div>
+        </div>
+
+        <!-- Full Interview Session Logs -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📋 Historical Session Records</div>
+          </div>
+          <div id="session-logs-container" style="overflow-x:auto;">
+            <p style="color:var(--text-muted); font-size:0.9rem;">Loading session records...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/charts.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navbar.init('Career Memory');
+      await loadProgressData();
+    });
+
+    async function loadProgressData() {
+      try {
+        const res = await API.get('/career-twin');
+        if (res.success && res.twin) {
+          renderProgress(res.twin.careerMemory?.timeline || []);
+        }
+      } catch (err) {
+        console.error('Error loading progress:', err);
+      }
+    }
+
+    function renderProgress(timeline) {
+      document.getElementById('history-sessions-badge').textContent = `${timeline.length} Session${timeline.length === 1 ? '' : 's'}`;
+
+      if (timeline.length === 0) {
+        document.getElementById('career-memory-narrative').innerHTML = `
+          ℹ️ Complete mock interview sessions to build your historical performance trajectory. No fake charts are rendered.
+        `;
+        document.getElementById('session-logs-container').innerHTML = `
+          <div style="text-align:center; padding:2rem; color:var(--text-muted);">
+            <p>No completed sessions recorded in Career Memory yet.</p>
+            <a href="/interview.html" class="btn btn-outline btn-sm" style="margin-top:0.75rem;">Start First Mock Session</a>
+          </div>
+        `;
+        return;
+      }
+
+      // Render Trend Line Chart
+      Charts.renderMemoryTrend('career-memory-chart', timeline);
+
+      // Compute Narrative from actual stored data
+      const first = timeline[0];
+      const latest = timeline[timeline.length - 1];
+      const commDiff = (latest.communicationScore || 0) - (first.communicationScore || 0);
+      const techDiff = (latest.technicalScore || 0) - (first.technicalScore || 0);
+
+      let narrativeText = `Recorded <strong>${timeline.length}</strong> interview session(s). `;
+      if (timeline.length > 1) {
+        if (commDiff >= 0) {
+          narrativeText += `Your communication score has improved by <strong>+${commDiff} points</strong> from session 1 to session ${timeline.length}. `;
+        } else {
+          narrativeText += `Your communication score shifted by <strong>${commDiff} points</strong> across your sessions. `;
+        }
+        if (techDiff >= 0) {
+          narrativeText += `Technical depth improved by <strong>+${techDiff} points</strong>.`;
+        }
+      } else {
+        narrativeText += `Initial baseline established with Overall score of <strong>${latest.overallScore}/100</strong>. Practice more sessions to unlock longitudinal trend lines.`;
+      }
+
+      document.getElementById('career-memory-narrative').innerHTML = narrativeText;
+
+      // Render Table
+      document.getElementById('session-logs-container').innerHTML = `
+        <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border-color); text-align:left; color:var(--text-muted); font-size:0.75rem; text-transform:uppercase;">
+              <th style="padding:0.75rem 0.5rem;">Session</th>
+              <th style="padding:0.75rem 0.5rem;">Role & Company</th>
+              <th style="padding:0.75rem 0.5rem; text-align:center;">Overall</th>
+              <th style="padding:0.75rem 0.5rem; text-align:center;">Tech Depth</th>
+              <th style="padding:0.75rem 0.5rem; text-align:center;">Communication</th>
+              <th style="padding:0.75rem 0.5rem; text-align:right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${timeline.map((t, idx) => `
+              <tr style="border-bottom:1px solid var(--border-color);">
+                <td style="padding:0.85rem 0.5rem; font-weight:600;">#${idx + 1} &bull; ${Utils.formatDate(t.date)}</td>
+                <td style="padding:0.85rem 0.5rem;">${Utils.escapeHTML(t.role)} <span style="color:var(--text-muted);">(${Utils.escapeHTML(t.company)})</span></td>
+                <td style="padding:0.85rem 0.5rem; text-align:center; font-weight:700; color:var(--accent-primary);">${t.overallScore}/100</td>
+                <td style="padding:0.85rem 0.5rem; text-align:center; color:var(--accent-secondary);">${t.technicalScore}/100</td>
+                <td style="padding:0.85rem 0.5rem; text-align:center; color:var(--accent-emerald);">${t.communicationScore}/100</td>
+                <td style="padding:0.85rem 0.5rem; text-align:right;">
+                  <a href="/interview-report.html?id=${t.interviewId}" class="btn btn-outline btn-sm">View Report</a>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+  </script>
+</body>
+</html>

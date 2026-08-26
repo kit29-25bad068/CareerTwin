@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: careertwin-ai
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: WHISPER_API_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false

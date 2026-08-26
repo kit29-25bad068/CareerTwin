@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skill Matrix & Gaps - CareerTwin AI</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <div class="page-container">
+        <!-- Header -->
+        <div class="card card-glow" style="margin-bottom: 2rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <div>
+              <div class="badge badge-emerald" style="margin-bottom:0.4rem;">Skill Gap Intelligence Engine</div>
+              <h1 style="font-size: 1.85rem; margin-bottom: 0.25rem;">Skill Matrix & Gap Detection</h1>
+              <p id="skills-target-meta" style="font-size: 0.95rem; color: var(--text-secondary);">
+                Comparing verified skills against industry expectations for your target role.
+              </p>
+            </div>
+            <div style="display:flex; gap:0.75rem;">
+              <button id="run-gap-analysis-btn" class="btn btn-cyan btn-md" onclick="runGapAnalysis()">
+                ⚡ Run AI Skill Gap Analysis
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Doughnut Overview + Add Skill Form -->
+        <div class="grid grid-cols-12" style="margin-bottom: 2rem;">
+          <!-- Coverage Doughnut -->
+          <div class="card col-span-5">
+            <div class="card-header">
+              <div class="card-title">📊 Competency vs Gaps</div>
+            </div>
+            <div style="height: 240px; position: relative;">
+              <canvas id="skill-doughnut-canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- Quick Add Custom Skill Form -->
+          <div class="card col-span-7">
+            <div class="card-header">
+              <div class="card-title">➕ Add Custom Competency</div>
+            </div>
+            <form id="add-skill-form">
+              <div class="grid grid-cols-2">
+                <div class="form-group">
+                  <label class="form-label" for="new-skill-name">Skill Name</label>
+                  <input type="text" id="new-skill-name" class="form-input" placeholder="e.g. Docker, GraphQL, Redis" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="new-skill-category">Category</label>
+                  <select id="new-skill-category" class="form-select">
+                    <option value="Frontend">Frontend</option>
+                    <option value="Backend">Backend</option>
+                    <option value="Database">Database</option>
+                    <option value="DevOps & Cloud">DevOps & Cloud</option>
+                    <option value="Core CS & DSA">Core CS & DSA</option>
+                    <option value="AI & Data">AI & Data</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="new-skill-proficiency">Proficiency Level (0-100%)</label>
+                <input type="range" id="new-skill-proficiency" min="10" max="100" value="70" class="form-input" oninput="document.getElementById('prof-val').textContent = this.value + '%'">
+                <div style="text-align:right; font-size:0.8rem; color:var(--accent-cyan); font-weight:700;" id="prof-val">70%</div>
+              </div>
+              <button type="submit" class="btn btn-secondary btn-sm" style="width:100%;">
+                Save Skill to Profile
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Verified Skills vs Skill Gaps Lists -->
+        <div class="grid grid-cols-2" style="margin-bottom: 2rem;">
+          <!-- Verified Skills -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">✅ Verified Skills (<span id="verified-count-badge">0</span>)</div>
+            </div>
+            <div id="verified-skills-list" style="display:flex; flex-direction:column; gap:0.85rem; max-height:450px; overflow-y:auto;">
+              <p style="color:var(--text-muted); font-size:0.85rem;">No verified skills yet.</p>
+            </div>
+          </div>
+
+          <!-- Skill Gaps to Learn -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">⚠️ Priority Skill Gaps (<span id="gaps-count-badge">0</span>)</div>
+            </div>
+            <div id="skill-gaps-list" style="display:flex; flex-direction:column; gap:0.85rem; max-height:450px; overflow-y:auto;">
+              <p style="color:var(--text-muted); font-size:0.85rem;">Run AI gap analysis to identify missing competencies.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/charts.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navbar.init('Skill Matrix');
+      await loadSkills();
+
+      document.getElementById('add-skill-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('new-skill-name').value.trim();
+        const category = document.getElementById('new-skill-category').value;
+        const proficiency = document.getElementById('new-skill-proficiency').value;
+
+        try {
+          const res = await API.post('/skills', { name, category, proficiency, isGap: false });
+          if (res.success) {
+            Utils.showToast('Skill added!', 'success');
+            document.getElementById('new-skill-name').value = '';
+            await loadSkills();
+          }
+        } catch (err) {
+          Utils.showToast(err.message || 'Failed to add skill.', 'error');
+        }
+      });
+    });
+
+    async function loadSkills() {
+      try {
+        const res = await API.get('/skills');
+        if (res.success) {
+          renderSkills(res.skills || [], res.gaps || []);
+        }
+      } catch (err) {
+        console.error('Error loading skills:', err);
+      }
+    }
+
+    function renderSkills(verified, gaps) {
+      document.getElementById('verified-count-badge').textContent = verified.length;
+      document.getElementById('gaps-count-badge').textContent = gaps.length;
+
+      // Render Doughnut
+      Charts.renderSkillCoverageDoughnut('skill-doughnut-canvas', verified.length, gaps.length);
+
+      // Render Verified Skills List
+      const vContainer = document.getElementById('verified-skills-list');
+      if (verified.length === 0) {
+        vContainer.innerHTML = `<p style="color:var(--text-muted); font-size:0.85rem;">No verified skills yet. Upload a resume or add skills manually.</p>`;
+      } else {
+        vContainer.innerHTML = verified.map((sk) => `
+          <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.75rem 1rem; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:600; font-size:0.95rem; color:var(--text-primary);">${Utils.escapeHTML(sk.name)}</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${Utils.escapeHTML(sk.category)} &bull; Source: ${Utils.escapeHTML(sk.source)}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:1rem;">
+              <span class="badge badge-emerald">${sk.proficiency}%</span>
+              <button class="btn btn-outline btn-sm" onclick="deleteSkill('${sk._id}')" style="padding:0.2rem 0.45rem;">✕</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Render Gaps List
+      const gContainer = document.getElementById('skill-gaps-list');
+      if (gaps.length === 0) {
+        gContainer.innerHTML = `
+          <div style="text-align:center; padding:2rem; color:var(--text-muted);">
+            <p>No skill gaps identified yet.</p>
+            <button class="btn btn-outline btn-sm" onclick="runGapAnalysis()" style="margin-top:0.75rem;">Run AI Gap Analysis</button>
+          </div>
+        `;
+      } else {
+        gContainer.innerHTML = gaps.map((g) => {
+          let priorityBadge = 'badge-primary';
+          if (g.gapPriority === 'High') priorityBadge = 'badge-danger';
+          if (g.gapPriority === 'Medium') priorityBadge = 'badge-warning';
+
+          return `
+            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.85rem 1rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+                <div style="font-weight:600; font-size:0.95rem; color:var(--text-primary);">${Utils.escapeHTML(g.name)}</div>
+                <span class="badge ${priorityBadge}">${Utils.escapeHTML(g.gapPriority)} Priority</span>
+              </div>
+              <div style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:0.5rem;">${Utils.escapeHTML(g.gapReason || 'Recommended competency for target role.')}</div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.75rem; color:var(--accent-secondary);">${Utils.escapeHTML(g.category)}</span>
+                <button class="btn btn-outline btn-sm" onclick="deleteSkill('${g._id}')" style="padding:0.2rem 0.45rem;">✕ Dismiss</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    async function runGapAnalysis() {
+      Utils.showLoading('Analyzing target role expectations and computing real skill gaps...');
+      try {
+        const res = await API.post('/skills/gap-analysis', {});
+        Utils.hideLoading();
+        if (res.success) {
+          Utils.showToast('Skill gaps updated successfully!', 'success');
+          await loadSkills();
+        }
+      } catch (err) {
+        Utils.hideLoading();
+        Utils.showToast(err.message || 'Error analyzing skill gaps.', 'error');
+      }
+    }
+
+    async function deleteSkill(id) {
+      try {
+        const res = await API.delete(`/skills/${id}`);
+        if (res.success) {
+          Utils.showToast('Skill removed.', 'info');
+          await loadSkills();
+        }
+      } catch (err) {
+        Utils.showToast(err.message || 'Error removing skill.', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

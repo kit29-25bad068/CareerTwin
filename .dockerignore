@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.env
+.env.local
+.git
+.gitignore
+uploads/resumes/*
+!uploads/resumes/.gitkeep
+uploads/recordings/*
+!uploads/recordings/.gitkeep
+uploads/temp/*
+!uploads/temp/.gitkeep

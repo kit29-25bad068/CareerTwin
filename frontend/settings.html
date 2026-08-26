@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy & Settings - CareerTwin AI</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <div class="page-container">
+        <!-- Header -->
+        <div class="card card-glow" style="margin-bottom: 2rem;">
+          <div class="badge badge-cyan" style="margin-bottom:0.4rem;">Data Control & Preferences</div>
+          <h1 style="font-size: 1.85rem; margin-bottom: 0.25rem;">Settings & Privacy Controls</h1>
+          <p style="font-size: 0.95rem; color: var(--text-secondary);">
+            Manage your career profile background, configure privacy modes, export your data, or execute complete data wipes.
+          </p>
+        </div>
+
+        <!-- Section 1: Career Profile Information -->
+        <div class="card" style="margin-bottom: 2rem;">
+          <div class="card-header">
+            <div class="card-title">👤 Career Profile Details</div>
+          </div>
+
+          <form id="profile-edit-form">
+            <div class="grid grid-cols-2">
+              <div class="form-group">
+                <label class="form-label" for="prof-name">Full Name</label>
+                <input type="text" id="prof-name" class="form-input" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="prof-target-role">Target Role</label>
+                <input type="text" id="prof-target-role" class="form-input" required>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3">
+              <div class="form-group">
+                <label class="form-label" for="prof-college">College / University</label>
+                <input type="text" id="prof-college" class="form-input" placeholder="e.g. Stanford University">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="prof-degree">Degree & Branch</label>
+                <input type="text" id="prof-degree" class="form-input" placeholder="e.g. B.S. Computer Science">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="prof-grad-year">Graduation Year</label>
+                <input type="number" id="prof-grad-year" class="form-input" placeholder="2026">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2">
+              <div class="form-group">
+                <label class="form-label" for="prof-exp-level">Experience Level</label>
+                <select id="prof-exp-level" class="form-select">
+                  <option value="student">Student / Undergraduate</option>
+                  <option value="entry-level">Entry-Level (0-2 years)</option>
+                  <option value="intermediate">Intermediate (2-5 years)</option>
+                  <option value="senior">Senior (5+ years)</option>
+                  <option value="career-changer">Career Changer</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="prof-target-companies">Dream Companies (comma separated)</label>
+                <input type="text" id="prof-target-companies" class="form-input" placeholder="Google, Microsoft, Stripe">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prof-summary">Career Summary / Bio</label>
+              <textarea id="prof-summary" class="form-textarea" style="min-height:75px;" placeholder="Brief overview of your focus areas and career ambitions..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-md">
+              💾 Save Profile Updates
+            </button>
+          </form>
+        </div>
+
+        <!-- Section 2: Privacy Mode Preferences -->
+        <div class="card" style="margin-bottom: 2rem;">
+          <div class="card-header">
+            <div class="card-title">🔒 Privacy Mode Preferences</div>
+          </div>
+
+          <form id="privacy-settings-form">
+            <div style="margin-bottom: 1.25rem;">
+              <label class="form-label">Default Interview Privacy Mode</label>
+              <div style="display:flex; gap:2rem; margin-top:0.5rem;">
+                <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                  <input type="radio" name="defaultPrivacyMode" value="privacy" id="mode-priv">
+                  <span><strong>Privacy Mode (Recommended):</strong> Process media in memory and instantly delete.</span>
+                </label>
+                <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                  <input type="radio" name="defaultPrivacyMode" value="replay" id="mode-rep">
+                  <span><strong>Replay Mode:</strong> Save video recording securely for review.</span>
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-cyan btn-md">
+              Update Privacy Preferences
+            </button>
+          </form>
+        </div>
+
+        <!-- Section 3: Data Export & Complete Control (Red Zone) -->
+        <div class="card" style="border-color: rgba(244,63,94,0.3); background: rgba(244,63,94,0.02);">
+          <div class="card-header" style="border-color: rgba(244,63,94,0.2);">
+            <div class="card-title" style="color: var(--accent-rose);">🛡️ Complete Data Control & Privacy Zone</div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:1.25rem;">
+            <!-- Export Data -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+              <div>
+                <strong style="font-size:0.95rem; color:var(--text-primary);">Export Digital Career Twin (JSON)</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary);">Download a complete copy of all your stored profile, skills, and scores.</p>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="exportData()">
+                📥 Export JSON Data
+              </button>
+            </div>
+
+            <!-- Wipe Recordings -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-top:1px solid var(--border-color); padding-top:1rem;">
+              <div>
+                <strong style="font-size:0.95rem; color:var(--text-primary);">Wipe All Saved Video Recordings</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary);">Permanently deletes all video/audio files from storage. Retains score metrics.</p>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="wipeRecordings()">
+                🗑️ Delete All Recordings
+              </button>
+            </div>
+
+            <!-- Wipe Career Memory -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-top:1px solid var(--border-color); padding-top:1rem;">
+              <div>
+                <strong style="font-size:0.95rem; color:var(--text-primary);">Clear Career Memory</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary);">Wipes all interview session history and resets longitudinal progress charts.</p>
+              </div>
+              <button class="btn btn-danger btn-sm" onclick="wipeMemory()">
+                ⚠️ Clear Career Memory
+              </button>
+            </div>
+
+            <!-- Delete Entire Account -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-top:1px solid var(--border-color); padding-top:1rem;">
+              <div>
+                <strong style="font-size:0.95rem; color:var(--accent-rose);">Delete Entire Account & All Data</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary);">Irreversibly removes your account, all resumes, projects, and Twin documents.</p>
+              </div>
+              <button class="btn btn-danger btn-md" onclick="deleteAccount()">
+                💥 Delete Account Permanently
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navbar.init('Settings');
+      await loadSettings();
+
+      // Profile Form Submit
+      document.getElementById('profile-edit-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('prof-name').value.trim();
+        const targetRole = document.getElementById('prof-target-role').value.trim();
+        const college = document.getElementById('prof-college').value.trim();
+        const degree = document.getElementById('prof-degree').value.trim();
+        const graduationYear = document.getElementById('prof-grad-year').value;
+        const experienceLevel = document.getElementById('prof-exp-level').value;
+        const targetCompanies = document.getElementById('prof-target-companies').value.split(',').map((s) => s.trim()).filter(Boolean);
+        const careerSummary = document.getElementById('prof-summary').value.trim();
+
+        Utils.showLoading('Updating Career Profile...');
+        try {
+          const res = await API.put('/profile', {
+            name,
+            targetRole,
+            college,
+            degree,
+            graduationYear: graduationYear ? Number(graduationYear) : null,
+            experienceLevel,
+            targetCompanies,
+            careerSummary,
+          });
+          Utils.hideLoading();
+          if (res.success) {
+            Utils.showToast('Profile updated successfully!', 'success');
+            await Auth.fetchCurrentUser();
+          }
+        } catch (err) {
+          Utils.hideLoading();
+          Utils.showToast(err.message || 'Failed to update profile.', 'error');
+        }
+      });
+
+      // Privacy Settings Submit
+      document.getElementById('privacy-settings-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const defaultPrivacyMode = document.querySelector('input[name="defaultPrivacyMode"]:checked').value;
+
+        try {
+          const res = await API.put('/auth/privacy-settings', { defaultPrivacyMode });
+          if (res.success) {
+            Utils.showToast('Privacy preferences updated!', 'success');
+            await Auth.fetchCurrentUser();
+          }
+        } catch (err) {
+          Utils.showToast(err.message || 'Error updating privacy settings.', 'error');
+        }
+      });
+    });
+
+    async function loadSettings() {
+      try {
+        const [profRes, userRes] = await Promise.all([
+          API.get('/profile'),
+          API.get('/auth/me'),
+        ]);
+
+        if (profRes.success && profRes.profile) {
+          const p = profRes.profile;
+          document.getElementById('prof-name').value = userRes.user?.name || '';
+          document.getElementById('prof-target-role').value = p.targetRole || 'Full Stack Developer';
+          document.getElementById('prof-college').value = p.college || '';
+          document.getElementById('prof-degree').value = p.degree || '';
+          document.getElementById('prof-grad-year').value = p.graduationYear || '';
+          document.getElementById('prof-exp-level').value = p.experienceLevel || 'student';
+          document.getElementById('prof-target-companies').value = (p.targetCompanies || []).join(', ');
+          document.getElementById('prof-summary').value = p.careerSummary || '';
+        }
+
+        if (userRes.success && userRes.user) {
+          const mode = userRes.user.privacySettings?.defaultPrivacyMode || 'privacy';
+          if (mode === 'replay') {
+            document.getElementById('mode-rep').checked = true;
+          } else {
+            document.getElementById('mode-priv').checked = true;
+          }
+        }
+      } catch (err) {
+        console.error('Error loading settings:', err);
+      }
+    }
+
+    function exportData() {
+      window.location.href = `/api/privacy/export?token=${API.getToken()}`;
+    }
+
+    async function wipeRecordings() {
+      if (!confirm('Are you sure you want to delete all saved video recordings? Scores and analytics will remain.')) return;
+      try {
+        Utils.showLoading('Deleting recordings...');
+        const res = await API.post('/privacy/wipe-recordings', {});
+        Utils.hideLoading();
+        if (res.success) {
+          Utils.showToast(res.message, 'success');
+        }
+      } catch (err) {
+        Utils.hideLoading();
+        Utils.showToast(err.message || 'Error wiping recordings.', 'error');
+      }
+    }
+
+    async function wipeMemory() {
+      if (!confirm('Are you sure you want to clear your entire interview history? This will reset all performance trend charts.')) return;
+      try {
+        Utils.showLoading('Clearing Career Memory...');
+        const res = await API.post('/privacy/wipe-memory', {});
+        Utils.hideLoading();
+        if (res.success) {
+          Utils.showToast(res.message, 'info');
+        }
+      } catch (err) {
+        Utils.hideLoading();
+        Utils.showToast(err.message || 'Error clearing memory.', 'error');
+      }
+    }
+
+    async function deleteAccount() {
+      const confirmText = prompt('Type DELETE to permanently remove your account and all career data:');
+      if (confirmText !== 'DELETE') return;
+
+      try {
+        Utils.showLoading('Deleting account and data...');
+        const res = await API.delete('/privacy/account');
+        Utils.hideLoading();
+        if (res.success) {
+          alert('Your account has been deleted.');
+          API.logout();
+        }
+      } catch (err) {
+        Utils.hideLoading();
+        Utils.showToast(err.message || 'Error deleting account.', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

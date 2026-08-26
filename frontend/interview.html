@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Mock Interview - CareerTwin AI</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    /* Modal Backdrop */
+    .setup-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(11, 15, 25, 0.9);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+    }
+    .setup-modal-card {
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <div class="page-container">
+        <!-- SETUP MODAL (Visible before starting) -->
+        <div id="setup-modal" class="setup-modal-overlay">
+          <div class="card setup-modal-card card-glow">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+              <div style="font-size: 2.25rem; margin-bottom: 0.5rem;">🎙️</div>
+              <h2 style="font-size: 1.6rem; margin-bottom: 0.25rem;">Configure Mock Interview</h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">
+                Simulation based on publicly available and generalized interview patterns.
+              </p>
+            </div>
+
+            <form id="interview-setup-form">
+              <div class="grid grid-cols-2">
+                <div class="form-group">
+                  <label class="form-label">Target Role</label>
+                  <input type="text" id="setup-role" class="form-input" value="Software Engineer" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Company Twin</label>
+                  <select id="setup-company" class="form-select">
+                    <option value="Google">Google</option>
+                    <option value="Microsoft">Microsoft</option>
+                    <option value="Amazon">Amazon</option>
+                    <option value="Apple">Apple</option>
+                    <option value="Adobe">Adobe</option>
+                    <option value="Atlassian">Atlassian</option>
+                    <option value="Zoho">Zoho</option>
+                    <option value="TCS">TCS</option>
+                    <option value="Infosys">Infosys</option>
+                    <option value="High-Growth Startup">High-Growth Startup</option>
+                    <option value="Custom">Custom Company...</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="custom-company-group" class="form-group" style="display:none;">
+                <label class="form-label">Enter Custom Company Name</label>
+                <input type="text" id="setup-custom-company" class="form-input" placeholder="e.g. Stripe, OpenAI, Meta">
+              </div>
+
+              <div class="grid grid-cols-3">
+                <div class="form-group">
+                  <label class="form-label">Interview Type</label>
+                  <select id="setup-type" class="form-select">
+                    <option value="Mixed">Mixed (Recommended)</option>
+                    <option value="Technical">Technical</option>
+                    <option value="HR">HR</option>
+                    <option value="Behavioral">Behavioral</option>
+                    <option value="Project-based">Project-based</option>
+                    <option value="System Design">System Design</option>
+                    <option value="Managerial">Managerial</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Difficulty</label>
+                  <select id="setup-difficulty" class="form-select">
+                    <option value="Medium">Medium</option>
+                    <option value="Easy">Easy</option>
+                    <option value="Hard">Hard</option>
+                    <option value="Adaptive">Adaptive</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Recruiter Persona</label>
+                  <select id="setup-recruiter" class="form-select">
+                    <option value="Technical Interviewer">Technical Interviewer</option>
+                    <option value="HR Recruiter">HR Recruiter</option>
+                    <option value="Engineering Manager">Engineering Manager</option>
+                    <option value="Startup Founder">Startup Founder</option>
+                    <option value="Behavioral Interviewer">Behavioral Interviewer</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Privacy Mode Options -->
+              <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+                <div style="font-size: 0.88rem; font-weight: 600; margin-bottom: 0.5rem;">🔒 Choose Privacy Level</div>
+                <div style="display: flex; gap: 1.5rem;">
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.88rem;">
+                    <input type="radio" name="privacy-mode" value="privacy" checked>
+                    <span><strong>Privacy Mode:</strong> Media deleted instantly</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.88rem;">
+                    <input type="radio" name="privacy-mode" value="replay">
+                    <span><strong>Replay Mode:</strong> Saved for review</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Media Toggles -->
+              <div style="display: flex; gap: 2rem; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                  <input type="checkbox" id="setup-camera" checked>
+                  <span>Enable Camera Preview & Vision Indicators</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                  <input type="checkbox" id="setup-mic" checked>
+                  <span>Enable Microphone & Speech Analysis</span>
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-cyan btn-lg" style="width: 100%;">
+                Enter AI Interview Room 🎙️
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- ACTIVE INTERVIEW ROOM (Hidden until started) -->
+        <div id="interview-active-room" class="interview-room-grid" style="display:none;">
+          <!-- Left: Interviewer Stage -->
+          <div class="interview-stage">
+            <div class="interviewer-area">
+              <div class="interviewer-avatar">🤖</div>
+              <div id="interviewer-name-display" class="interviewer-name">AI Recruiter</div>
+              <div id="interviewer-role-display" class="interviewer-role">Technical Interview</div>
+
+              <div id="current-question-text" class="question-bubble">
+                Preparing your first interview question...
+              </div>
+
+              <div class="question-meta">
+                <span id="question-counter-badge" class="badge badge-primary">Question 1 of 5</span>
+                <span id="company-tag-badge" class="badge badge-cyan">Google</span>
+                <span id="difficulty-tag-badge" class="badge badge-emerald">Medium</span>
+                <span id="room-privacy-mode-pill" class="badge badge-cyan">🛡️ Privacy Mode</span>
+              </div>
+            </div>
+
+            <!-- Answer Input & Transcript Preview -->
+            <div style="padding: 1rem 2rem; background: rgba(0,0,0,0.3); border-top: 1px solid var(--border-color);">
+              <label class="form-label" style="display:flex; justify-content:space-between;">
+                <span>Live Speech Transcript Preview (Microphone or Type)</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Whisper STT Active</span>
+              </label>
+              <textarea id="live-transcript-preview" class="form-textarea" style="min-height: 80px; font-size:0.9rem;" placeholder="Click 'Start Answering' below and speak into your microphone, or type your answer directly here..."></textarea>
+            </div>
+
+            <!-- Controls Bar -->
+            <div class="interview-controls-bar">
+              <div class="timer-display">
+                <span>⏱️</span>
+                <span id="interview-timer-text">00:00</span>
+              </div>
+
+              <button id="answer-toggle-btn" class="btn btn-cyan btn-lg" onclick="window.orchestrator.toggleAnswering()">
+                🎙️ Start Answering
+              </button>
+
+              <button class="btn btn-outline btn-sm" onclick="if(confirm('Conclude the interview and view report?')) window.orchestrator.concludeInterviewSession()">
+                End Session & View Report
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Side Panel (User Viewfinder & Waveform) -->
+          <div class="interview-side-panel">
+            <!-- Camera Viewfinder -->
+            <div class="camera-viewfinder">
+              <video id="camera-preview-video" class="camera-video" playsinline muted></video>
+              <canvas id="vision-tracker-canvas" style="display:none;"></canvas>
+              
+              <div id="camera-off-view" class="camera-off-viewfinder">
+                <div style="font-size: 2rem;">📷</div>
+                <div style="font-size: 0.8rem;">Camera Disabled</div>
+              </div>
+
+              <div class="camera-status-pill">
+                <div class="rec-dot"></div>
+                <span style="font-size: 0.7rem; font-weight:600;">LIVE FEED</span>
+              </div>
+            </div>
+
+            <!-- Waveform Canvas -->
+            <div class="waveform-container">
+              <canvas id="waveform-canvas" class="waveform-canvas" width="340" height="45"></canvas>
+            </div>
+
+            <!-- Indicators Card -->
+            <div class="card" style="padding: 1rem; font-size: 0.85rem;">
+              <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">
+                🎙️ Active Speech Intelligence
+              </div>
+              <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem; color: var(--text-secondary); font-size: 0.8rem;">
+                <li>&bull; Words Per Minute (WPM) & Pause Cadence</li>
+                <li>&bull; Filler words count (um, uh, actually, like)</li>
+                <li>&bull; Response structure & conceptual depth</li>
+                <li>&bull; Objective visual presence & eye contact</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/audio.js"></script>
+  <script src="/js/vision.js"></script>
+  <script src="/js/interview.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navbar.init('Mock Interview');
+      window.orchestrator = new InterviewOrchestrator();
+
+      // Pre-fill target role from profile
+      try {
+        const twinData = await API.get('/career-twin');
+        if (twinData.success && twinData.twin?.targetRole) {
+          document.getElementById('setup-role').value = twinData.twin.targetRole;
+        }
+      } catch (e) {}
+
+      // Handle custom company selector
+      document.getElementById('setup-company').addEventListener('change', (e) => {
+        const isCustom = e.target.value === 'Custom';
+        document.getElementById('custom-company-group').style.display = isCustom ? 'block' : 'none';
+      });
+
+      // Setup Form Submit
+      document.getElementById('interview-setup-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const role = document.getElementById('setup-role').value.trim();
+        const companySelect = document.getElementById('setup-company').value;
+        const customCompany = document.getElementById('setup-custom-company').value.trim();
+        const company = companySelect === 'Custom' ? (customCompany || 'Custom Tech') : companySelect;
+        
+        const interviewType = document.getElementById('setup-type').value;
+        const difficulty = document.getElementById('setup-difficulty').value;
+        const recruiterType = document.getElementById('setup-recruiter').value;
+        const privacyMode = document.querySelector('input[name="privacy-mode"]:checked').value;
+        const cameraEnabled = document.getElementById('setup-camera').checked;
+        const micEnabled = document.getElementById('setup-mic').checked;
+
+        await window.orchestrator.startInterviewSession({
+          role,
+          company,
+          interviewType,
+          difficulty,
+          recruiterType,
+          privacyMode,
+          cameraEnabled,
+          micEnabled,
+        });
+      });
+    });
+  </script>
+</body>
+</html>

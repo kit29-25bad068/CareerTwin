@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Intelligence - CareerTwin AI</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    .dropzone {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 3rem 2rem;
+      text-align: center;
+      background: rgba(17, 24, 39, 0.4);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent-primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <div class="page-container">
+        <!-- Header -->
+        <div class="card card-glow" style="margin-bottom: 2rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <div>
+              <div class="badge badge-primary" style="margin-bottom:0.4rem;">Resume Alignment Engine</div>
+              <h1 style="font-size: 1.85rem; margin-bottom: 0.25rem;">Resume Intelligence</h1>
+              <p style="font-size: 0.95rem; color: var(--text-secondary);">
+                Extract skills, assess quantifiable impact, and evaluate role alignment.
+              </p>
+            </div>
+            <button id="delete-resume-btn" class="btn btn-danger btn-sm" style="display:none;" onclick="deleteResume()">
+              🗑️ Delete Resume
+            </button>
+          </div>
+        </div>
+
+        <!-- Upload Dropzone (Visible if no resume or to replace) -->
+        <div id="resume-upload-section" class="card" style="margin-bottom: 2rem;">
+          <div class="card-header">
+            <div class="card-title">📤 Upload PDF Resume</div>
+          </div>
+          
+          <div id="pdf-dropzone" class="dropzone" onclick="document.getElementById('pdf-file-input').click()">
+            <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">📄</div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 0.25rem;">Click or drag PDF resume here</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Supports PDF up to 10MB</p>
+            <button type="button" class="btn btn-primary btn-sm">Select PDF File</button>
+            <input type="file" id="pdf-file-input" accept="application/pdf" style="display:none;">
+          </div>
+        </div>
+
+        <!-- Analysis Results (Hidden until loaded) -->
+        <div id="resume-analysis-section" style="display:none;">
+          <!-- 4 Score Cards -->
+          <div class="report-hero-grid">
+            <div class="report-metric-card">
+              <div class="report-metric-label">Overall Resume Score</div>
+              <div id="resume-score-overall" class="report-metric-value" style="color: var(--accent-primary);">--</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Composite Alignment</div>
+            </div>
+
+            <div class="report-metric-card">
+              <div class="report-metric-label">Quantified Impact</div>
+              <div id="resume-score-impact" class="report-metric-value" style="color: var(--accent-secondary);">--</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Metrics & Numbers</div>
+            </div>
+
+            <div class="report-metric-card">
+              <div class="report-metric-label">Clarity & Format</div>
+              <div id="resume-score-clarity" class="report-metric-value" style="color: var(--accent-emerald);">--</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Readability & Flow</div>
+            </div>
+
+            <div class="report-metric-card">
+              <div class="report-metric-label">Keyword Density</div>
+              <div id="resume-score-keyword" class="report-metric-value" style="color: var(--accent-violet);">--</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Role Competencies</div>
+            </div>
+          </div>
+
+          <!-- Grid: Strengths & Quantifiable Suggestions -->
+          <div class="grid grid-cols-2" style="margin-bottom: 2rem;">
+            <!-- Strengths -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">✅ Resume Strengths</div>
+              </div>
+              <ul id="resume-strengths-list" style="list-style:none; font-size:0.9rem; color:var(--text-secondary); display:flex; flex-direction:column; gap:0.65rem;">
+              </ul>
+            </div>
+
+            <!-- Quantifiable Suggestions -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">💡 Quantifiable Action Items</div>
+              </div>
+              <ul id="resume-suggestions-list" style="list-style:none; font-size:0.9rem; color:var(--text-secondary); display:flex; flex-direction:column; gap:0.65rem;">
+              </ul>
+            </div>
+          </div>
+
+          <!-- Extracted Skills & Missing Skills -->
+          <div class="grid grid-cols-2" style="margin-bottom: 2rem;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">⚡ Extracted Skills (Synced to Twin)</div>
+              </div>
+              <div id="resume-extracted-skills" style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">⚠️ Missing Target Role Competencies</div>
+              </div>
+              <div id="resume-missing-skills" style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navbar.init('Resume Intelligence');
+      setupDropzone();
+      await loadResumeData();
+    });
+
+    async function loadResumeData() {
+      try {
+        const res = await API.get('/resume');
+        if (res.success && res.hasResume && res.resume) {
+          renderResumeAnalysis(res.resume);
+        }
+      } catch (err) {
+        console.error('Error loading resume:', err);
+      }
+    }
+
+    function renderResumeAnalysis(resume) {
+      document.getElementById('resume-analysis-section').style.display = 'block';
+      document.getElementById('delete-resume-btn').style.display = 'inline-flex';
+
+      const a = resume.analysis || {};
+
+      document.getElementById('resume-score-overall').textContent = a.overallScore || 0;
+      document.getElementById('resume-score-impact').textContent = a.impactScore || 0;
+      document.getElementById('resume-score-clarity').textContent = a.clarityScore || 0;
+      document.getElementById('resume-score-keyword').textContent = a.keywordScore || 0;
+
+      // Strengths
+      const strList = document.getElementById('resume-strengths-list');
+      strList.innerHTML = (a.strengths || ['Good structure and clear sections']).map((s) => `
+        <li>✅ ${Utils.escapeHTML(s)}</li>
+      `).join('');
+
+      // Suggestions
+      const sugList = document.getElementById('resume-suggestions-list');
+      sugList.innerHTML = (a.quantifiableSuggestions || ['Include metrics and scale indicators']).map((s) => `
+        <li>💡 ${Utils.escapeHTML(s)}</li>
+      `).join('');
+
+      // Extracted Skills
+      const extSkills = document.getElementById('resume-extracted-skills');
+      const skills = resume.parsedData?.skills || [];
+      extSkills.innerHTML = skills.length > 0 
+        ? skills.map((sk) => `<span class="badge badge-emerald">${Utils.escapeHTML(sk)}</span>`).join('')
+        : '<p style="color:var(--text-muted); font-size:0.85rem;">No skills auto-extracted.</p>';
+
+      // Missing Skills
+      const missSkills = document.getElementById('resume-missing-skills');
+      const missing = a.missingSkills || [];
+      missSkills.innerHTML = missing.length > 0
+        ? missing.map((m) => `<span class="badge badge-amber">⚠️ ${Utils.escapeHTML(m)}</span>`).join('')
+        : '<p style="color:var(--text-muted); font-size:0.85rem;">No major gaps identified for this role.</p>';
+    }
+
+    function setupDropzone() {
+      const dropzone = document.getElementById('pdf-dropzone');
+      const fileInput = document.getElementById('pdf-file-input');
+
+      ['dragenter', 'dragover'].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropzone.classList.add('dragover');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropzone.classList.remove('dragover');
+        });
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type === 'application/pdf') {
+          uploadResumeFile(files[0]);
+        } else {
+          Utils.showToast('Please drop a valid PDF resume.', 'error');
+        }
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          uploadResumeFile(e.target.files[0]);
+        }
+      });
+    }
+
+    async function uploadResumeFile(file) {
+      Utils.showLoading('Extracting PDF text and analyzing alignment against target role...');
+      const formData = new FormData();
+      formData.append('resume', file);
+
+      try {
+        const res = await API.post('/resume/upload', formData);
+        Utils.hideLoading();
+        if (res.success && res.resume) {
+          Utils.showToast('Resume analyzed successfully and skills synced!', 'success');
+          renderResumeAnalysis(res.resume);
+        }
+      } catch (err) {
+        Utils.hideLoading();
+        Utils.showToast(err.message || 'Failed to analyze resume.', 'error');
+      }
+    }
+
+    async function deleteResume() {
+      if (!confirm('Are you sure you want to delete your resume and its analysis?')) return;
+      Utils.showLoading('Deleting resume data...');
+      try {
+        const res = await API.delete('/resume');
+        Utils.hideLoading();
+        if (res.success) {
+          Utils.showToast('Resume deleted successfully.', 'success');
+          document.getElementById('resume-analysis-section').style.display = 'none';
+          document.getElementById('delete-resume-btn').style.display = 'none';
+        }
+      } catch (err) {
+        Utils.hideLoading();
+        Utils.showToast(err.message || 'Error deleting resume.', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

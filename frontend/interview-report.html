@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interview Intelligence Report - CareerTwin AI</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <div class="page-container">
+        <!-- Header Banner -->
+        <div class="card card-glow" style="margin-bottom: 2rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <div>
+              <div style="display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem;">
+                <span id="report-privacy-badge" class="badge badge-cyan">🛡️ Privacy Mode</span>
+                <span id="role-readiness-badge" class="badge badge-emerald">Role Readiness: Ready</span>
+              </div>
+              <h1 id="report-role-title" style="font-size: 1.85rem; margin-bottom: 0.25rem;">Interview Report</h1>
+              <p id="report-company-meta" style="font-size: 0.95rem; color: var(--text-secondary);">Company &bull; Recruiter Persona</p>
+              <div id="report-date-meta" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Date</div>
+            </div>
+
+            <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+              <button id="delete-recording-btn" class="btn btn-danger btn-sm" style="display:none;" onclick="ReportViewer.deleteRecording()">
+                🗑️ Delete Video Recording
+              </button>
+              <a href="/interview.html" class="btn btn-cyan btn-md">🎙️ Practice Another Session</a>
+              <a href="/dashboard.html" class="btn btn-secondary btn-md">Dashboard</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Hero Metric Cards -->
+        <div class="report-hero-grid">
+          <div class="report-metric-card">
+            <div class="report-metric-label">Overall Score</div>
+            <div id="score-overall" class="report-metric-value" style="color: var(--accent-primary);">--</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Composite Performance</div>
+          </div>
+
+          <div class="report-metric-card">
+            <div class="report-metric-label">Technical Depth</div>
+            <div id="score-technical" class="report-metric-value" style="color: var(--accent-secondary);">--</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Correctness & Concepts</div>
+          </div>
+
+          <div class="report-metric-card">
+            <div class="report-metric-label">Communication</div>
+            <div id="score-communication" class="report-metric-value" style="color: var(--accent-emerald);">--</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Cadence & Structure</div>
+          </div>
+
+          <div class="report-metric-card">
+            <div class="report-metric-label">Problem Solving</div>
+            <div id="score-problem-solving" class="report-metric-value" style="color: var(--accent-violet);">--</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Trade-offs & Logic</div>
+          </div>
+        </div>
+
+        <!-- Key Improvement Callout -->
+        <div class="card" style="margin-bottom: 2rem; border-left: 4px solid var(--accent-amber); background: rgba(245, 158, 11, 0.05);">
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--accent-amber); text-transform: uppercase; margin-bottom: 0.25rem;">
+            🎯 Highest Leverage Improvement
+          </div>
+          <div id="report-most-important-improvement" style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary);">
+            Loading analysis...
+          </div>
+          <div id="report-summary-text" style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 0.5rem;">
+            Summary
+          </div>
+        </div>
+
+        <!-- Middle Grid: Replay/Highlights & Strengths/Weaknesses -->
+        <div class="grid grid-cols-12" style="margin-bottom: 2rem;">
+          <!-- Left: Strengths & Weaknesses -->
+          <div class="card col-span-5">
+            <div class="card-header">
+              <div class="card-title">⚖️ Performance Diagnostics</div>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+              <h4 style="color: var(--accent-emerald); font-size: 0.95rem; margin-bottom: 0.75rem;">Demonstrated Strengths</h4>
+              <ul id="report-strengths-list" style="list-style: none; font-size: 0.88rem; color: var(--text-secondary);">
+                <li>Loading strengths...</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 style="color: var(--accent-rose); font-size: 0.95rem; margin-bottom: 0.75rem;">Areas for Growth</h4>
+              <ul id="report-weaknesses-list" style="list-style: none; font-size: 0.88rem; color: var(--text-secondary);">
+                <li>Loading weaknesses...</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Right: Interactive Clickable Timeline Events -->
+          <div class="card col-span-7">
+            <div class="card-header">
+              <div class="card-title">⏱️ Clickable Interview Timeline</div>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">Click event to seek video & explain</span>
+            </div>
+
+            <!-- Video Player (if Replay Mode) -->
+            <div id="video-replay-section" style="margin-bottom: 1.25rem; display:none;">
+              <video id="replay-video-player" controls style="width: 100%; border-radius: var(--radius-md); max-height: 240px; background: #000;"></video>
+            </div>
+
+            <!-- Highlight Explanation Box -->
+            <div id="highlight-explanation-box" style="display:none; background:rgba(6, 182, 212, 0.1); border:1px solid rgba(6, 182, 212, 0.3); border-radius:var(--radius-md); padding:0.85rem; margin-bottom:1rem;">
+            </div>
+
+            <div id="timeline-events-container" class="timeline-list" style="max-height: 320px; overflow-y: auto;">
+              <p style="color: var(--text-muted); font-size: 0.85rem;">Loading timeline events...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Question by Question Accordion -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📝 Question-by-Question Deep Analysis</div>
+          </div>
+          <div id="questions-accordion-container">
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Loading questions breakdown...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/report.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navbar.init('Interview Report');
+      const urlParams = new URLSearchParams(window.location.search);
+      const interviewId = urlParams.get('id');
+
+      if (!interviewId) {
+        Utils.showToast('No interview ID specified. Redirecting to dashboard.', 'error');
+        setTimeout(() => window.location.href = '/dashboard.html', 1500);
+        return;
+      }
+
+      await ReportViewer.loadReport(interviewId);
+    });
+  </script>
+</body>
+</html>

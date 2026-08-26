@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Signals - CareerTwin AI</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <div class="page-container">
+        <!-- Header Banner -->
+        <div class="card card-glow-cyan" style="margin-bottom: 2rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <div>
+              <div class="badge badge-cyan" style="margin-bottom:0.4rem;">Engineering Signal Extractor</div>
+              <h1 style="font-size: 1.85rem; margin-bottom: 0.25rem;">GitHub Intelligence</h1>
+              <p style="font-size: 0.95rem; color: var(--text-secondary);">
+                Analyze public repositories, code breadth, documentation rigor, and engineering patterns.
+              </p>
+            </div>
+            <button id="disconnect-gh-btn" class="btn btn-danger btn-sm" style="display:none;" onclick="disconnectGitHub()">
+              Disconnect GitHub
+            </button>
+          </div>
+        </div>
+
+        <!-- Username Input Form -->
+        <div class="card" style="margin-bottom: 2rem;">
+          <form id="github-sync-form" style="display:flex; gap:1rem; flex-wrap:wrap; align-items:flex-end;">
+            <div class="form-group" style="flex:1; min-width:260px; margin-bottom:0;">
+              <label class="form-label" for="gh-username-input">GitHub Username</label>
+              <input type="text" id="gh-username-input" class="form-input" placeholder="e.g. torvalds, gaearon, or your username" required>
+            </div>
+            <button type="submit" id="sync-gh-btn" class="btn btn-cyan btn-md">
+              🐙 Sync & Analyze GitHub
+            </button>
+          </form>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;">
+            ℹ️ We only inspect publicly available repository data and language distributions. No private access required.
+          </div>
+        </div>
+
+        <!-- GitHub Analysis Results -->
+        <div id="github-results-section" style="display:none;">
+          <!-- Profile Overview Hero -->
+          <div class="card" style="margin-bottom: 2rem; display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;">
+            <img id="gh-avatar" src="" alt="Avatar" style="width:72px; height:72px; border-radius:50%; border:2px solid var(--accent-secondary);">
+            <div style="flex:1;">
+              <h2 id="gh-name" style="font-size:1.4rem;">@username</h2>
+              <p id="gh-bio" style="font-size:0.9rem; color:var(--text-secondary);">User bio</p>
+              <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.35rem;">
+                <span id="gh-repos-count">0</span> Public Repositories &bull; <span id="gh-followers-count">0</span> Followers
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Score Cards -->
+          <div class="report-hero-grid">
+            <div class="report-metric-card">
+              <div class="report-metric-label">Overall GitHub Score</div>
+              <div id="gh-score-overall" class="report-metric-value" style="color: var(--accent-primary);">--</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Engineering Rigor</div>
+            </div>
+
+            <div class="report-metric-card">
+              <div class="report-metric-label">Code Diversity</div>
+              <div id="gh-score-diversity" class="report-metric-value" style="color: var(--accent-secondary);">--</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Language Breadth</div>
+            </div>
+
+            <div class="report-metric-card">
+              <div class="report-metric-label">Documentation</div>
+              <div id="gh-score-docs" class="report-metric-value" style="color: var(--accent-emerald);">--</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">README Quality</div>
+            </div>
+
+            <div class="report-metric-card">
+              <div class="report-metric-label">Consistency</div>
+              <div id="gh-score-consistency" class="report-metric-value" style="color: var(--accent-violet);">--</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">Project Footprint</div>
+            </div>
+          </div>
+
+          <!-- Languages & Engineering Signals -->
+          <div class="grid grid-cols-2" style="margin-bottom: 2rem;">
+            <!-- Top Languages -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">⚡ Language Distribution</div>
+              </div>
+              <div id="gh-languages-list" style="display:flex; flex-direction:column; gap:0.75rem;">
+              </div>
+            </div>
+
+            <!-- Engineering Signals -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">🔍 Engineering Signals</div>
+              </div>
+              <ul id="gh-signals-list" style="list-style:none; font-size:0.9rem; color:var(--text-secondary); display:flex; flex-direction:column; gap:0.65rem;">
+              </ul>
+            </div>
+          </div>
+
+          <!-- Public Repositories List -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📦 Public Repositories Sample</div>
+            </div>
+            <div id="gh-repos-list" style="display:flex; flex-direction:column; gap:0.75rem;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navbar.init('GitHub Signals');
+      await loadGitHubProfile();
+
+      document.getElementById('github-sync-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('gh-username-input').value.trim();
+        if (!username) return;
+
+        Utils.showLoading(`Scanning @${username}'s public repositories and extracting engineering signals...`);
+        try {
+          const res = await API.post('/github/sync', { username });
+          Utils.hideLoading();
+          if (res.success && res.github) {
+            Utils.showToast('GitHub analysis synchronized successfully!', 'success');
+            renderGitHub(res.github);
+          }
+        } catch (err) {
+          Utils.hideLoading();
+          Utils.showToast(err.message || 'Failed to sync GitHub profile.', 'error');
+        }
+      });
+    });
+
+    async function loadGitHubProfile() {
+      try {
+        const res = await API.get('/github');
+        if (res.success && res.isConnected && res.github) {
+          renderGitHub(res.github);
+        }
+      } catch (err) {
+        console.error('Error loading GitHub:', err);
+      }
+    }
+
+    function renderGitHub(gh) {
+      document.getElementById('github-results-section').style.display = 'block';
+      document.getElementById('disconnect-gh-btn').style.display = 'inline-flex';
+      document.getElementById('gh-username-input').value = gh.username || '';
+
+      document.getElementById('gh-avatar').src = gh.avatarUrl || 'https://github.com/ghost.png';
+      document.getElementById('gh-name').textContent = `@${gh.username}`;
+      document.getElementById('gh-bio').textContent = gh.bio || 'Public Software Developer Profile';
+      document.getElementById('gh-repos-count').textContent = gh.publicReposCount || 0;
+      document.getElementById('gh-followers-count').textContent = gh.followersCount || 0;
+
+      const a = gh.analysis || {};
+      document.getElementById('gh-score-overall').textContent = a.overallScore || 0;
+      document.getElementById('gh-score-diversity').textContent = a.codeDiversityScore || 0;
+      document.getElementById('gh-score-docs').textContent = a.documentationScore || 0;
+      document.getElementById('gh-score-consistency').textContent = a.consistencyScore || 0;
+
+      // Languages
+      const langContainer = document.getElementById('gh-languages-list');
+      const langs = gh.topLanguages || [];
+      langContainer.innerHTML = langs.length > 0
+        ? langs.map((l) => `
+            <div>
+              <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.25rem;">
+                <span style="font-weight:600;">${Utils.escapeHTML(l.language)}</span>
+                <span style="color:var(--accent-cyan); font-weight:700;">${l.percentage}% (${l.repoCount} repos)</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-bar progress-bar-cyan" style="width: ${l.percentage}%;"></div>
+              </div>
+            </div>
+          `).join('')
+        : '<p style="color:var(--text-muted); font-size:0.85rem;">No language breakdown available.</p>';
+
+      // Signals
+      const sigList = document.getElementById('gh-signals-list');
+      const signals = a.engineeringSignals || ['Active repository footprint'];
+      sigList.innerHTML = signals.map((s) => `<li>🔹 ${Utils.escapeHTML(s)}</li>`).join('');
+
+      // Repositories
+      const repoContainer = document.getElementById('gh-repos-list');
+      const repos = gh.repositories || [];
+      repoContainer.innerHTML = repos.length > 0
+        ? repos.slice(0, 8).map((r) => `
+            <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+              <div>
+                <a href="${r.htmlUrl}" target="_blank" style="font-weight:600; font-size:0.95rem; color:var(--text-primary);">
+                  ${Utils.escapeHTML(r.name)} ↗
+                </a>
+                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.2rem;">
+                  ${Utils.escapeHTML(r.description || 'No description provided.')}
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:0.5rem; white-space:nowrap;">
+                <span class="badge badge-primary">${Utils.escapeHTML(r.language || 'Code')}</span>
+                <span style="font-size:0.8rem; color:var(--text-muted);">⭐ ${r.stars}</span>
+              </div>
+            </div>
+          `).join('')
+        : '<p style="color:var(--text-muted); font-size:0.85rem;">No repositories found.</p>';
+    }
+
+    async function disconnectGitHub() {
+      if (!confirm('Disconnect your GitHub profile and remove signals from your Twin?')) return;
+      try {
+        const res = await API.delete('/github');
+        if (res.success) {
+          Utils.showToast('GitHub disconnected.', 'success');
+          document.getElementById('github-results-section').style.display = 'none';
+          document.getElementById('disconnect-gh-btn').style.display = 'none';
+          document.getElementById('gh-username-input').value = '';
+        }
+      } catch (err) {
+        Utils.showToast(err.message || 'Failed to disconnect GitHub.', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

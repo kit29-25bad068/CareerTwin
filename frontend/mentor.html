@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mentor AI - CareerTwin AI</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <div class="page-container">
+        <!-- Header -->
+        <div class="card card-glow" style="margin-bottom: 1.5rem; padding: 1.25rem 1.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <div>
+              <div class="badge badge-purple" style="margin-bottom:0.25rem;">Twin Context-Aware AI</div>
+              <h1 style="font-size: 1.6rem; margin-bottom: 0.15rem;">Career Mentor AI</h1>
+              <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                Directly grounded in your actual interview scores, resume, GitHub signals, and skill gaps.
+              </p>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="clearMentorChat()">
+              🧹 Clear Chat
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="mentor-chat-wrapper">
+          <!-- Messages -->
+          <div id="chat-messages-container" class="mentor-chat-messages">
+            <div class="chat-bubble chat-bubble-mentor">
+              Hello! I am your personal CareerTwin AI Mentor. I have full access to your digital career profile, target roles, interview metrics, and skill gaps. How can I help guide your preparation today?
+            </div>
+          </div>
+
+          <!-- Prompt Chips -->
+          <div class="prompt-chips">
+            <div class="prompt-chip" onclick="sendPromptChip(this.textContent)">"Why is my communication score low?"</div>
+            <div class="prompt-chip" onclick="sendPromptChip(this.textContent)">"What should I learn next based on my gaps?"</div>
+            <div class="prompt-chip" onclick="sendPromptChip(this.textContent)">"How can I improve my project engineering strength?"</div>
+            <div class="prompt-chip" onclick="sendPromptChip(this.textContent)">"What is my highest leverage improvement this month?"</div>
+          </div>
+
+          <!-- Input Bar -->
+          <form id="mentor-chat-form" class="mentor-chat-input-bar">
+            <input type="text" id="mentor-chat-input" class="form-input" placeholder="Ask your Career Mentor anything regarding your preparation, gaps, or scores..." required autocomplete="off">
+            <button type="submit" id="send-msg-btn" class="btn btn-cyan btn-md" style="white-space:nowrap;">
+              Send 🚀
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navbar.init('Career Mentor AI');
+      await loadConversation();
+
+      document.getElementById('mentor-chat-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const input = document.getElementById('mentor-chat-input');
+        const message = input.value.trim();
+        if (!message) return;
+
+        input.value = '';
+        await handleSendMessage(message);
+      });
+    });
+
+    async function loadConversation() {
+      try {
+        const res = await API.get('/mentor');
+        if (res.success && res.conversation) {
+          renderMessages(res.conversation.messages || []);
+        }
+      } catch (err) {
+        console.error('Error loading mentor chat:', err);
+      }
+    }
+
+    function renderMessages(messages) {
+      const container = document.getElementById('chat-messages-container');
+      if (!messages || messages.length === 0) return;
+
+      container.innerHTML = messages.map((m) => `
+        <div class="chat-bubble ${m.sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-mentor'}">
+          ${Utils.escapeHTML(m.text).replace(/\n/g, '<br>')}
+        </div>
+      `).join('');
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    async function handleSendMessage(message) {
+      const container = document.getElementById('chat-messages-container');
+      
+      // Append user bubble immediately
+      const userBubble = document.createElement('div');
+      userBubble.className = 'chat-bubble chat-bubble-user';
+      userBubble.textContent = message;
+      container.appendChild(userBubble);
+      container.scrollTop = container.scrollHeight;
+
+      // Append typing loader
+      const loaderBubble = document.createElement('div');
+      loaderBubble.className = 'chat-bubble chat-bubble-mentor';
+      loaderBubble.id = 'mentor-typing-loader';
+      loaderBubble.innerHTML = '<span class="spinner" style="width:16px; height:16px; margin-right:8px;"></span> Analyzing your Twin data...';
+      container.appendChild(loaderBubble);
+      container.scrollTop = container.scrollHeight;
+
+      try {
+        const res = await API.post('/mentor/chat', { message });
+        loaderBubble.remove();
+        if (res.success && res.message) {
+          const mentorBubble = document.createElement('div');
+          mentorBubble.className = 'chat-bubble chat-bubble-mentor';
+          mentorBubble.innerHTML = Utils.escapeHTML(res.message).replace(/\n/g, '<br>');
+          container.appendChild(mentorBubble);
+          container.scrollTop = container.scrollHeight;
+        }
+      } catch (err) {
+        loaderBubble.remove();
+        Utils.showToast(err.message || 'Mentor error.', 'error');
+      }
+    }
+
+    function sendPromptChip(chipText) {
+      const clean = chipText.replace(/^"|"$/g, '').trim();
+      document.getElementById('mentor-chat-input').value = clean;
+      handleSendMessage(clean);
+    }
+
+    async function clearMentorChat() {
+      if (!confirm('Clear your conversation history with Mentor AI?')) return;
+      try {
+        const res = await API.delete('/mentor');
+        if (res.success) {
+          Utils.showToast('Mentor chat cleared.', 'info');
+          await loadConversation();
+        }
+      } catch (err) {
+        Utils.showToast(err.message || 'Failed to clear chat.', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

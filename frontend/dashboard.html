@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - CareerTwin AI</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Dynamic Sidebar -->
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <!-- Dynamic Topbar -->
+      <div id="topbar-container"></div>
+
+      <div class="page-container">
+        <!-- Hero Banner with Career Goal -->
+        <div class="card card-glow" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(17,24,39,0.9) 0%, rgba(31,41,61,0.6) 100%);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--accent-secondary); letter-spacing: 0.05em; font-weight: 600; margin-bottom: 0.25rem;">
+                Target Career Path
+              </div>
+              <h1 id="target-role-title" style="font-size: 1.85rem; margin-bottom: 0.25rem;">Loading Profile...</h1>
+              <p id="active-goal-desc" style="font-size: 0.95rem; color: var(--text-secondary);">Synchronizing your Digital Career Twin...</p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <a href="/interview.html" class="btn btn-cyan btn-md">🎙️ Start Mock Interview</a>
+              <a href="/mentor.html" class="btn btn-secondary btn-md">🤖 Ask Mentor AI</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Central Metrics Grid: Readiness Dial + 4 Core Signals -->
+        <div class="grid grid-cols-12" style="margin-bottom: 2rem;">
+          <!-- Left: Career Readiness Dial -->
+          <div class="card col-span-4" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+            <div class="card-title" style="margin-bottom: 1.25rem;">
+              <span>Career Readiness Index</span>
+            </div>
+            <div id="readiness-dial-container" style="margin: 0.5rem 0;"></div>
+            <div id="readiness-tier-badge" class="badge badge-primary" style="margin-top: 0.75rem; font-size: 0.8rem;">
+              Calculating...
+            </div>
+            <p id="readiness-disclaimer" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem; line-height: 1.4;">
+              Internal readiness indicator based on recorded artifacts.
+            </p>
+          </div>
+
+          <!-- Right: 4 Metric Cards -->
+          <div class="col-span-8 grid grid-cols-2">
+            <div class="card card-interactive" onclick="window.location.href='/interview.html'">
+              <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎙️</div>
+              <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Technical Interviews</div>
+              <div id="metric-interview-score" style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin: 0.25rem 0;">--</div>
+              <div id="metric-interview-sub" style="font-size: 0.8rem; color: var(--text-secondary);">0 sessions completed</div>
+            </div>
+
+            <div class="card card-interactive" onclick="window.location.href='/resume.html'">
+              <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📄</div>
+              <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Resume Alignment</div>
+              <div id="metric-resume-score" style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin: 0.25rem 0;">--</div>
+              <div id="metric-resume-sub" style="font-size: 0.8rem; color: var(--text-secondary);">No resume uploaded</div>
+            </div>
+
+            <div class="card card-interactive" onclick="window.location.href='/github.html'">
+              <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🐙</div>
+              <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">GitHub Signals</div>
+              <div id="metric-github-score" style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin: 0.25rem 0;">--</div>
+              <div id="metric-github-sub" style="font-size: 0.8rem; color: var(--text-secondary);">Not connected</div>
+            </div>
+
+            <div class="card card-interactive" onclick="window.location.href='/skills.html'">
+              <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⚡</div>
+              <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Skill Coverage</div>
+              <div id="metric-skills-score" style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin: 0.25rem 0;">--</div>
+              <div id="metric-skills-sub" style="font-size: 0.8rem; color: var(--text-secondary);">0 skills verified</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Middle Row: Radar Chart + Smart Recommendations -->
+        <div class="grid grid-cols-12" style="margin-bottom: 2rem;">
+          <!-- 360 Degree Radar Chart -->
+          <div class="card col-span-6">
+            <div class="card-header">
+              <div class="card-title">🧬 360° Career Twin Radar</div>
+              <a href="/career-twin.html" class="btn btn-outline btn-sm">Full Twin View</a>
+            </div>
+            <div style="height: 320px; position: relative;">
+              <canvas id="readiness-radar-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Proactive Recommendations -->
+          <div class="card col-span-6">
+            <div class="card-header">
+              <div class="card-title">💡 Smart Recommendations</div>
+              <span class="badge badge-amber" id="recs-count-badge">0 Actions</span>
+            </div>
+            <div id="recommendations-list" style="display: flex; flex-direction: column; gap: 0.85rem; max-height: 320px; overflow-y: auto;">
+              <div class="skeleton" style="height: 70px;"></div>
+              <div class="skeleton" style="height: 70px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Row: Recent Interview History & Quick Roadmap Progress -->
+        <div class="grid grid-cols-12">
+          <!-- Recent Mock Interviews -->
+          <div class="card col-span-8">
+            <div class="card-header">
+              <div class="card-title">🎙️ Recent Mock Interviews</div>
+              <a href="/interview.html" class="btn btn-outline btn-sm">New Session</a>
+            </div>
+            <div id="recent-interviews-list">
+              <p style="color: var(--text-muted); font-size: 0.9rem;">Loading interview records...</p>
+            </div>
+          </div>
+
+          <!-- Quick Roadmap Progress -->
+          <div class="card col-span-4">
+            <div class="card-header">
+              <div class="card-title">🗺️ Career Roadmap</div>
+              <a href="/roadmap.html" class="btn btn-outline btn-sm">View</a>
+            </div>
+            <div id="roadmap-summary-content">
+              <p style="color: var(--text-muted); font-size: 0.9rem;">Loading roadmap...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/charts.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navbar.init('Dashboard');
+      await loadDashboardData();
+    });
+
+    async function loadDashboardData() {
+      try {
+        const data = await API.get('/career-twin');
+        if (data.success && data.twin) {
+          renderDashboard(data.twin);
+        }
+
+        // Fetch recommendations
+        const recsData = await API.get('/career-twin/recommendations');
+        if (recsData.success) {
+          renderRecommendations(recsData.recommendations || []);
+        }
+      } catch (err) {
+        console.error('Error loading dashboard:', err);
+        Utils.showToast(err.message || 'Failed to load Career Twin data.', 'error');
+      }
+    }
+
+    function renderDashboard(twin) {
+      // 1. Role Title
+      document.getElementById('target-role-title').textContent = twin.targetRole || 'Full Stack Developer';
+      document.getElementById('active-goal-desc').textContent = twin.activeGoal?.title 
+        ? `Goal: ${twin.activeGoal.title} (Target: ${twin.activeGoal.targetCompany || 'Top Tech'})` 
+        : 'Set a career goal to align your Twin with specific company expectations.';
+
+      // 2. Readiness Dial
+      const score = twin.careerReadiness?.score;
+      Utils.renderScoreDial('readiness-dial-container', score, 'Readiness Index');
+      
+      const tierEl = document.getElementById('readiness-tier-badge');
+      tierEl.textContent = twin.careerReadiness?.tier || 'Not enough data yet';
+      tierEl.className = `badge ${score >= 75 ? 'badge-success' : score >= 50 ? 'badge-cyan' : 'badge-amber'}`;
+
+      // 3. Four Metric Cards
+      // Interview
+      const invScoreEl = document.getElementById('metric-interview-score');
+      const invSubEl = document.getElementById('metric-interview-sub');
+      if (twin.interviews.avgTechnical !== null) {
+        invScoreEl.textContent = `${twin.interviews.avgTechnical}/100`;
+        invSubEl.textContent = `${twin.interviews.totalCount} interview(s) completed`;
+      } else {
+        invScoreEl.textContent = '--';
+        invSubEl.textContent = 'No interviews yet';
+      }
+
+      // Resume
+      const resScoreEl = document.getElementById('metric-resume-score');
+      const resSubEl = document.getElementById('metric-resume-sub');
+      if (twin.resume.score !== null) {
+        resScoreEl.textContent = `${twin.resume.score}/100`;
+        resSubEl.textContent = 'Resume analyzed & aligned';
+      } else {
+        resScoreEl.textContent = '--';
+        resSubEl.textContent = 'Upload PDF resume';
+      }
+
+      // GitHub
+      const ghScoreEl = document.getElementById('metric-github-score');
+      const ghSubEl = document.getElementById('metric-github-sub');
+      if (twin.github.isConnected) {
+        ghScoreEl.textContent = `${twin.github.score || 70}/100`;
+        ghSubEl.textContent = `@${twin.github.username} synced`;
+      } else {
+        ghScoreEl.textContent = '--';
+        ghSubEl.textContent = 'Connect GitHub profile';
+      }
+
+      // Skills
+      const skillScoreEl = document.getElementById('metric-skills-score');
+      const skillSubEl = document.getElementById('metric-skills-sub');
+      if (twin.skills.coveragePercentage !== null) {
+        skillScoreEl.textContent = `${twin.skills.coveragePercentage}%`;
+        skillSubEl.textContent = `${twin.skills.verified.length} verified &bull; ${twin.skills.gaps.length} gaps`;
+      } else {
+        skillScoreEl.textContent = '--';
+        skillSubEl.textContent = 'Run skill gap analysis';
+      }
+
+      // 4. Render 360 Radar Chart
+      Charts.renderReadinessRadar('readiness-radar-chart', twin.careerReadiness.breakdown || []);
+
+      // 5. Render Recent Interviews List
+      renderRecentInterviews(twin.careerMemory?.timeline || []);
+
+      // 6. Render Roadmap Summary
+      renderRoadmapSummary(twin.roadmap);
+    }
+
+    function renderRecommendations(recs) {
+      const container = document.getElementById('recommendations-list');
+      const countBadge = document.getElementById('recs-count-badge');
+      countBadge.textContent = `${recs.length} Action${recs.length === 1 ? '' : 's'}`;
+
+      if (recs.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎉</div>
+            <p>Your Career Twin is up to date! Keep practicing mock interviews.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = recs.slice(0, 4).map((r) => `
+        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+          <div>
+            <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.2rem;">${Utils.escapeHTML(r.title)}</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">${Utils.escapeHTML(r.description)}</div>
+          </div>
+          <a href="${r.actionUrl}" class="btn btn-outline btn-sm" style="white-space: nowrap;">${Utils.escapeHTML(r.actionLabel)}</a>
+        </div>
+      `).join('');
+    }
+
+    function renderRecentInterviews(interviews) {
+      const container = document.getElementById('recent-interviews-list');
+      if (!interviews || interviews.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎙️</div>
+            <p>No completed interviews yet.</p>
+            <a href="/interview.html" class="btn btn-cyan btn-sm" style="margin-top: 1rem;">Start First Mock Session</a>
+          </div>
+        `;
+        return;
+      }
+
+      const rows = interviews.slice(0, 4).map((inv) => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+          <div>
+            <div style="font-weight: 600; font-size: 0.95rem;">${Utils.escapeHTML(inv.role)} &bull; <span style="color:var(--text-muted); font-size:0.85rem;">${Utils.escapeHTML(inv.company)}</span></div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">${Utils.formatDate(inv.date)}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap: 1rem;">
+            <div style="text-align:right;">
+              <span style="font-size: 1.15rem; font-weight: 700; color: ${inv.overallScore >= 75 ? 'var(--accent-emerald)' : 'var(--accent-amber)'};">${inv.overallScore}</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">/100</span>
+            </div>
+            <a href="/interview-report.html?id=${inv.interviewId}" class="btn btn-outline btn-sm">Report</a>
+          </div>
+        </div>
+      `).join('');
+
+      container.innerHTML = rows;
+    }
+
+    function renderRoadmapSummary(roadmap) {
+      const container = document.getElementById('roadmap-summary-content');
+      if (!roadmap || !roadmap.hasRoadmap) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🗺️</div>
+            <p>No roadmap generated yet.</p>
+            <a href="/roadmap.html" class="btn btn-outline btn-sm" style="margin-top: 0.75rem;">Build Roadmap</a>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div style="margin-bottom: 1rem;">
+          <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
+            <span>Overall Progress</span>
+            <span style="font-weight:700; color:var(--accent-cyan);">${roadmap.progressPercentage}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-bar progress-bar-cyan" style="width: ${roadmap.progressPercentage}%;"></div>
+          </div>
+        </div>
+        <div style="font-size:0.85rem; color:var(--text-secondary);">
+          ${roadmap.milestonesCount} phased monthly milestones tailored to your skill gaps.
+        </div>
+        <a href="/roadmap.html" class="btn btn-secondary btn-sm" style="width:100%; margin-top:1.25rem;">Open Full Roadmap</a>
+      `;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Career Twin - CareerTwin AI</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <div class="main-content">
+      <div id="topbar-container"></div>
+
+      <div class="page-container">
+        <!-- Twin Identity Hero -->
+        <div class="twin-hero-banner">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.5rem;">
+            <div>
+              <div class="badge badge-purple" style="margin-bottom:0.5rem;">Digital Career Twin Snapshot</div>
+              <h1 id="twin-user-name" style="font-size: 2.2rem; margin-bottom: 0.25rem;">Candidate Twin</h1>
+              <p id="twin-target-role" style="font-size: 1.1rem; color: var(--accent-secondary); font-weight: 600;">
+                Target: Full Stack Developer
+              </p>
+              <div id="twin-education-meta" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
+                Education & Experience: Synchronizing...
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div id="twin-readiness-dial" style="display:inline-block;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 360 Degree Radar & Explainable Breakdown Table -->
+        <div class="grid grid-cols-12" style="margin-bottom: 2rem;">
+          <!-- Radar Chart -->
+          <div class="card col-span-5">
+            <div class="card-header">
+              <div class="card-title">🧬 Twin Competency Topology</div>
+            </div>
+            <div style="height: 350px; position: relative;">
+              <canvas id="twin-radar-canvas"></canvas>
+            </div>
+          </div>
+
+          <!-- Explainable Evidence Table -->
+          <div class="card col-span-7">
+            <div class="card-header">
+              <div class="card-title">📊 Explainable Readiness Breakdown</div>
+            </div>
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--border-color); text-align: left; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">
+                    <th style="padding: 0.75rem 0.5rem;">Dimension</th>
+                    <th style="padding: 0.75rem 0.5rem; text-align: center;">Weight</th>
+                    <th style="padding: 0.75rem 0.5rem; text-align: center;">Score</th>
+                    <th style="padding: 0.75rem 0.5rem;">Evidence & Grounding</th>
+                  </tr>
+                </thead>
+                <tbody id="readiness-breakdown-tbody">
+                  <tr>
+                    <td colspan="4" style="text-align:center; padding: 2rem; color: var(--text-muted);">
+                      Computing twin signals...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+              ℹ️ <strong>Evidence Grounding:</strong> Every dimension is calculated solely from your authentic uploaded artifacts and session logs. No random or fabricated numbers.
+            </div>
+          </div>
+        </div>
+
+        <!-- Connected Data Streams Grid -->
+        <h2 style="margin-bottom: 1.25rem;">Connected Twin Data Streams</h2>
+        <div class="twin-signal-grid">
+          <!-- Resume Stream -->
+          <div class="signal-card">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                <span style="font-size:1.5rem;">📄</span>
+                <span class="badge badge-primary" id="stream-resume-badge">Resume</span>
+              </div>
+              <h3 style="font-size: 1.1rem; margin-bottom: 0.25rem;">Resume Alignment</h3>
+              <p id="stream-resume-desc" style="font-size:0.85rem; color:var(--text-secondary);">
+                Analyzing keywords, quantifiable metrics, and structure.
+              </p>
+            </div>
+            <div style="margin-top:1.25rem; display:flex; justify-content:space-between; align-items:center;">
+              <span id="stream-resume-score" style="font-size:1.25rem; font-weight:700;">--</span>
+              <a href="/resume.html" class="btn btn-outline btn-sm">Manage Resume</a>
+            </div>
+          </div>
+
+          <!-- GitHub Stream -->
+          <div class="signal-card">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                <span style="font-size:1.5rem;">🐙</span>
+                <span class="badge badge-cyan" id="stream-github-badge">GitHub</span>
+              </div>
+              <h3 style="font-size: 1.1rem; margin-bottom: 0.25rem;">GitHub Engineering</h3>
+              <p id="stream-github-desc" style="font-size:0.85rem; color:var(--text-secondary);">
+                Code diversity, documentation rigor, and public repository depth.
+              </p>
+            </div>
+            <div style="margin-top:1.25rem; display:flex; justify-content:space-between; align-items:center;">
+              <span id="stream-github-score" style="font-size:1.25rem; font-weight:700;">--</span>
+              <a href="/github.html" class="btn btn-outline btn-sm">Inspect Signals</a>
+            </div>
+          </div>
+
+          <!-- Interviews Stream -->
+          <div class="signal-card">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                <span style="font-size:1.5rem;">🎙️</span>
+                <span class="badge badge-emerald" id="stream-interview-badge">Interviews</span>
+              </div>
+              <h3 style="font-size: 1.1rem; margin-bottom: 0.25rem;">Interview Intelligence</h3>
+              <p id="stream-interview-desc" style="font-size:0.85rem; color:var(--text-secondary);">
+                Technical accuracy, communication cadence, filler words, and problem solving.
+              </p>
+            </div>
+            <div style="margin-top:1.25rem; display:flex; justify-content:space-between; align-items:center;">
+              <span id="stream-interview-score" style="font-size:1.25rem; font-weight:700;">--</span>
+              <a href="/interview.html" class="btn btn-outline btn-sm">Start Session</a>
+            </div>
+          </div>
+
+          <!-- Projects Stream -->
+          <div class="signal-card">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                <span style="font-size:1.5rem;">🚀</span>
+                <span class="badge badge-purple" id="stream-project-badge">Projects</span>
+              </div>
+              <h3 style="font-size: 1.1rem; margin-bottom: 0.25rem;">AI Project Evaluator</h3>
+              <p id="stream-project-desc" style="font-size:0.85rem; color:var(--text-secondary);">
+                10-dimension rubric assessing technical complexity and engineering quality.
+              </p>
+            </div>
+            <div style="margin-top:1.25rem; display:flex; justify-content:space-between; align-items:center;">
+              <span id="stream-project-score" style="font-size:1.25rem; font-weight:700;">--</span>
+              <a href="/projects.html" class="btn btn-outline btn-sm">Add Project</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/charts.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Navbar.init('Digital Career Twin');
+      await loadTwinState();
+    });
+
+    async function loadTwinState() {
+      try {
+        const data = await API.get('/career-twin');
+        if (data.success && data.twin) {
+          renderTwin(data.twin);
+        }
+      } catch (err) {
+        Utils.showToast(err.message || 'Failed to load Career Twin state.', 'error');
+      }
+    }
+
+    function renderTwin(twin) {
+      // 1. Identity
+      const user = API.getUser();
+      document.getElementById('twin-user-name').textContent = user?.name || 'Career Twin';
+      document.getElementById('twin-target-role').textContent = `Target Role: ${twin.targetRole}`;
+      
+      const collegeStr = twin.profile?.college ? `${twin.profile.college} &bull; ` : '';
+      const expStr = twin.profile?.experienceLevel ? `${twin.profile.experienceLevel.toUpperCase()}` : 'STUDENT';
+      document.getElementById('twin-education-meta').innerHTML = `${collegeStr}${expStr}`;
+
+      // 2. Readiness Dial
+      Utils.renderScoreDial('twin-readiness-dial', twin.careerReadiness.score, 'Readiness Index');
+
+      // 3. Radar Chart
+      Charts.renderReadinessRadar('twin-radar-canvas', twin.careerReadiness.breakdown || []);
+
+      // 4. Breakdown Table
+      const tbody = document.getElementById('readiness-breakdown-tbody');
+      if (twin.careerReadiness.breakdown && twin.careerReadiness.breakdown.length > 0) {
+        tbody.innerHTML = twin.careerReadiness.breakdown.map((row) => `
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 0.85rem 0.5rem; font-weight: 600; color: var(--text-primary);">
+              ${Utils.escapeHTML(row.dimension)}
+            </td>
+            <td style="padding: 0.85rem 0.5rem; text-align: center; color: var(--text-muted);">
+              ${row.weight}%
+            </td>
+            <td style="padding: 0.85rem 0.5rem; text-align: center;">
+              ${row.score !== null ? `<span style="font-weight:700; color:var(--accent-cyan);">${row.score}/100</span>` : '<span style="color:var(--text-muted);">--</span>'}
+            </td>
+            <td style="padding: 0.85rem 0.5rem; color: var(--text-secondary); font-size: 0.82rem;">
+              ${Utils.escapeHTML(row.evidence)}
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // 5. Streams
+      // Resume
+      if (twin.resume.hasResume) {
+        document.getElementById('stream-resume-score').textContent = `${twin.resume.score}/100`;
+        document.getElementById('stream-resume-desc').textContent = twin.resume.analysis?.summary || 'Resume analyzed.';
+      }
+
+      // GitHub
+      if (twin.github.isConnected) {
+        document.getElementById('stream-github-score').textContent = `${twin.github.score}/100`;
+        document.getElementById('stream-github-desc').textContent = `@${twin.github.username} connected with ${twin.github.analysis?.codeDiversityScore || 70}% code diversity.`;
+      }
+
+      // Interviews
+      if (twin.interviews.totalCount > 0) {
+        document.getElementById('stream-interview-score').textContent = `${twin.interviews.avgOverall}/100`;
+        document.getElementById('stream-interview-desc').textContent = `${twin.interviews.totalCount} interview session(s). Avg Tech: ${twin.interviews.avgTechnical}, Comm: ${twin.interviews.avgCommunication}.`;
+      }
+
+      // Projects
+      if (twin.projects.count > 0) {
+        document.getElementById('stream-project-score').textContent = `${twin.projects.avgScore}/100`;
+        document.getElementById('stream-project-desc').textContent = `${twin.projects.count} showcase project(s) evaluated across 10 dimensions.`;
+      }
+    }
+  </script>
+</body>
+</html>

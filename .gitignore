@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Uploads and temporary media
+uploads/recordings/*
+!uploads/recordings/.gitkeep
+uploads/resumes/*
+!uploads/resumes/.gitkeep
+uploads/temp/*
+!uploads/temp/.gitkeep
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
