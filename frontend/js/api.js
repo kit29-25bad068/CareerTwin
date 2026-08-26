@@ -2,7 +2,9 @@
  * CareerTwin AI - Centralized API Client
  */
 
-const API_BASE = '/api';
+// Dynamic Backend URL for separated frontend/backend deployments
+const BACKEND_ORIGIN = window.CAREERTWIN_BACKEND_URL || localStorage.getItem('careertwin_backend_url') || '';
+const API_BASE = `${BACKEND_ORIGIN}/api`;
 
 const API = {
   getToken() {
