@@ -339,6 +339,18 @@
   gap: 1rem;
 }
 
+.user-pill {
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.user-pill:hover {
+  background: var(--bg-card-hover) !important;
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 14px rgba(99, 102, 241, 0.35);
+  transform: translateY(-1px);
+}
+
 /* -------------------------------------------------------------
    6. Progress Bars & Readiness Dials
    ------------------------------------------------------------- */

@@ -55,10 +55,10 @@ const Navbar = {
         </nav>
 
         <div class="sidebar-footer">
-          <div style="display:flex; flex-direction:column; overflow:hidden;">
-            <span class="user-display-name" style="font-size:0.875rem; font-weight:600; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">User</span>
+          <a href="/settings.html" style="display:flex; flex-direction:column; overflow:hidden; text-decoration:none; cursor:pointer;" title="View & Edit Profile Details">
+            <span class="user-display-name" style="font-size:0.875rem; font-weight:600; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; color:var(--text-primary);">User</span>
             <span class="badge badge-cyan user-privacy-mode-badge" style="margin-top:0.25rem; font-size:0.65rem; width:fit-content;">🛡️ Privacy Mode</span>
-          </div>
+          </a>
           <button class="btn btn-outline btn-sm" onclick="API.logout()" title="Log out" style="padding: 0.35rem 0.55rem;">
             🚪
           </button>
@@ -79,12 +79,12 @@ const Navbar = {
         </div>
 
         <div class="topbar-right">
-          <div class="user-pill" style="display:flex; align-items:center; gap:0.75rem; background:var(--bg-tertiary); padding:0.4rem 0.85rem; border-radius:var(--radius-full); border:1px solid var(--border-color);">
+          <a href="/settings.html" class="user-pill" style="display:flex; align-items:center; gap:0.75rem; background:var(--bg-tertiary); padding:0.4rem 0.95rem; border-radius:var(--radius-full); border:1px solid var(--border-color); cursor:pointer; text-decoration:none;" title="View & Edit Profile Details">
             <div style="width:28px; height:28px; border-radius:50%; background:var(--accent-primary); display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700;">
               👤
             </div>
-            <span class="user-display-name" style="font-size:0.875rem; font-weight:500;">User</span>
-          </div>
+            <span class="user-display-name" style="font-size:0.875rem; font-weight:600; color:var(--text-primary);">User</span>
+          </a>
         </div>
       </header>
     `;
