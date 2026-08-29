@@ -25,7 +25,12 @@ const Navbar = {
 
     const linksHtml = this.navLinks
       .map((link) => {
-        const isActive = currentPath === link.url || currentPath.endsWith(link.url.replace(/^\//, ''));
+        const cleanUrl = link.url.replace('.html', '');
+        const isActive =
+          currentPath === link.url ||
+          currentPath === cleanUrl ||
+          currentPath.endsWith(link.url.replace(/^\//, '')) ||
+          currentPath.endsWith(cleanUrl.replace(/^\//, ''));
         return `
           <a href="${link.url}" class="nav-link ${isActive ? 'active' : ''}">
             <span class="nav-icon">${link.icon}</span>

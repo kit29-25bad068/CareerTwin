@@ -3,16 +3,47 @@
  */
 
 const Auth = {
+  getNormalizedPath() {
+    let path = window.location.pathname.toLowerCase().trim();
+    if (path.length > 1 && path.endsWith('/')) {
+      path = path.slice(0, -1);
+    }
+    return path;
+  },
+
   isPublicPage() {
-    const publicPages = ['/', '/index.html', '/login.html', '/register.html'];
-    const currentPath = window.location.pathname;
-    return publicPages.includes(currentPath) || currentPath.endsWith('index.html') || currentPath.endsWith('login.html') || currentPath.endsWith('register.html');
+    const path = this.getNormalizedPath();
+    const publicPaths = [
+      '',
+      '/',
+      '/index',
+      '/index.html',
+      '/login',
+      '/login.html',
+      '/register',
+      '/register.html',
+    ];
+    return (
+      publicPaths.includes(path) ||
+      path.endsWith('/index') ||
+      path.endsWith('/index.html') ||
+      path.endsWith('/login') ||
+      path.endsWith('/login.html') ||
+      path.endsWith('/register') ||
+      path.endsWith('/register.html')
+    );
   },
 
   isAuthFormPage() {
-    const authPages = ['/login.html', '/register.html'];
-    const currentPath = window.location.pathname;
-    return authPages.some((p) => currentPath.endsWith(p));
+    const path = this.getNormalizedPath();
+    const authPaths = ['/login', '/login.html', '/register', '/register.html'];
+    return (
+      authPaths.includes(path) ||
+      path.endsWith('/login') ||
+      path.endsWith('/login.html') ||
+      path.endsWith('/register') ||
+      path.endsWith('/register.html')
+    );
   },
 
   checkAuth() {
@@ -21,13 +52,14 @@ const Auth = {
     const isAuthForm = this.isAuthFormPage();
 
     if (!token && !isPublic) {
-      // User is on private page without token
-      window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname)}`;
+      const currentPath = window.location.pathname;
+      if (!currentPath.toLowerCase().includes('login') && !currentPath.toLowerCase().includes('register')) {
+        window.location.href = `/login.html?redirect=${encodeURIComponent(currentPath)}`;
+      }
       return false;
     }
 
     if (token && isAuthForm) {
-      // User is already logged in and visiting login/register
       window.location.href = '/dashboard.html';
       return true;
     }

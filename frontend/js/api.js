@@ -39,7 +39,10 @@ const API = {
   logout() {
     this.setToken(null);
     this.setUser(null);
-    window.location.href = '/login.html';
+    const path = window.location.pathname.toLowerCase();
+    if (!path.includes('login') && !path.includes('register') && path !== '/' && !path.includes('index')) {
+      window.location.href = '/login.html';
+    }
   },
 
   async request(endpoint, options = {}) {
@@ -68,9 +71,15 @@ const API = {
       const response = await fetch(url, config);
 
       if (response.status === 401) {
-        // Token expired or invalid
-        console.warn('Session expired. Redirecting to login.');
-        this.logout();
+        console.warn('Session expired or unauthorized request.');
+        if (this.getToken()) {
+          this.setToken(null);
+          this.setUser(null);
+        }
+        const path = window.location.pathname.toLowerCase();
+        if (!path.includes('login') && !path.includes('register') && path !== '/' && !path.includes('index')) {
+          window.location.href = '/login.html';
+        }
         throw new Error('Session expired. Please log in again.');
       }
 
