@@ -173,8 +173,8 @@ class InterviewOrchestrator {
       const manualTranscript = document.getElementById('live-transcript-preview')?.value || '';
       const finalAnswerText = manualTranscript || transcript || 'Provided verbal explanation.';
 
-      // 2. Collect vision metrics
-      const visionMetrics = this.visionTracker.stopTracking();
+      // 2. Collect vision metrics for current question
+      const visionMetrics = this.visionTracker.sampleQuestionMetrics();
 
       // 3. Package Form Data
       const formData = new FormData();
@@ -212,6 +212,7 @@ class InterviewOrchestrator {
   async concludeInterviewSession() {
     Utils.showLoading('Generating comprehensive post-interview performance report...');
     this.stopTimer();
+    this.visionTracker.stopTracking();
 
     try {
       // 1. If Replay Mode, upload full video recording

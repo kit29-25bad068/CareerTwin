@@ -213,6 +213,12 @@
                 <div class="rec-dot"></div>
                 <span style="font-size: 0.7rem; font-weight:600;">LIVE FEED</span>
               </div>
+
+              <!-- Live Eye-Contact & Gaze HUD Indicator -->
+              <div id="camera-gaze-hud" style="display:none; position:absolute; bottom:8px; left:8px; right:8px; background:rgba(11,15,25,0.85); backdrop-filter:blur(8px); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:4px 10px; align-items:center; justify-content:space-between; font-size:0.75rem; z-index:10; transition:all 0.25s ease;">
+                <span id="gaze-status-indicator">🟢 Eye Contact: Direct</span>
+                <span id="gaze-percentage-indicator" style="color:var(--accent-secondary); font-weight:600;">100%</span>
+              </div>
             </div>
 
             <!-- Waveform Canvas -->
