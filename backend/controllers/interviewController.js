@@ -44,12 +44,7 @@ exports.createInterview = async (req, res, next) => {
       });
     } catch (aiErr) {
       console.warn('[Interview Gemini Warning] Fallback question used:', aiErr.message);
-      firstQuestion = {
-        questionText: `Welcome! Let's begin. Can you introduce yourself and tell me about a challenging technical project you built as a ${targetRole}?`,
-        category: 'technical',
-        difficulty: chosenDifficulty,
-        expectedConcepts: ['Project Architecture', 'Trade-offs', 'Problem Solving'],
-      };
+      firstQuestion = geminiService.getDynamicFallbackQuestion(targetRole, 0, chosenDifficulty);
     }
 
     // 2. Create Interview document in MongoDB
@@ -282,12 +277,17 @@ exports.submitAnswer = async (req, res, next) => {
         nextQuestion = interview.questions[interview.questions.length - 1];
       } catch (aiErr) {
         console.warn('[Next Question Warning] Fallback next question used:', aiErr.message);
+        const fallbackQ = geminiService.getDynamicFallbackQuestion(
+          interview.role,
+          interview.questions.length,
+          interview.difficulty
+        );
         interview.questions.push({
           questionIndex: interview.questions.length,
-          questionText: 'How do you handle debugging and diagnosing issues when deploying code to production?',
-          category: 'problem-solving',
-          difficulty: interview.difficulty,
-          expectedConcepts: ['Logging', 'Monitoring', 'Root Cause Analysis'],
+          questionText: fallbackQ.questionText,
+          category: fallbackQ.category || 'technical',
+          difficulty: fallbackQ.difficulty || interview.difficulty,
+          expectedConcepts: fallbackQ.expectedConcepts || [],
         });
         nextQuestion = interview.questions[interview.questions.length - 1];
       }

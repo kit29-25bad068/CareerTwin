@@ -37,65 +37,84 @@ function cleanJsonText(rawText) {
 /**
  * Call Gemini API directly via Google AI REST endpoint
  */
-async function callGemini(prompt, systemInstruction = '', jsonMode = true) {
+/**
+ * Call Gemini API directly via Google AI REST endpoint with multi-model fallback
+ */
+async function callGemini(prompt, systemInstruction = '', jsonMode = true, options = {}) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === 'your_gemini_api_key_here') {
     throw new Error('GEMINI_API_KEY is not configured in .env. Please configure a valid Gemini API key.');
   }
 
-  // Use gemini-1.5-flash or gemini-2.5-flash
-  const modelName = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+  const modelsToTry = [
+    process.env.GEMINI_MODEL || 'gemini-1.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-pro',
+  ];
 
-  const requestBody = {
-    contents: [
-      {
-        role: 'user',
-        parts: [{ text: prompt }],
-      },
-    ],
-    generationConfig: {
-      temperature: 0.4,
-      topP: 0.95,
-      maxOutputTokens: 2500,
-    },
-  };
+  let lastError = null;
 
-  if (systemInstruction) {
-    requestBody.systemInstruction = {
-      parts: [{ text: systemInstruction }],
-    };
-  }
+  for (const modelName of modelsToTry) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
-  if (jsonMode) {
-    requestBody.generationConfig.responseMimeType = 'application/json';
-  }
+      const requestBody = {
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: prompt }],
+          },
+        ],
+        generationConfig: {
+          temperature: options.temperature !== undefined ? options.temperature : 0.85,
+          topP: 0.95,
+          maxOutputTokens: options.maxTokens || 2500,
+        },
+      };
 
-  try {
-    const response = await axios.post(url, requestBody, {
-      headers: { 'Content-Type': 'application/json' },
-      timeout: 45000,
-    });
+      if (systemInstruction) {
+        requestBody.systemInstruction = {
+          parts: [{ text: systemInstruction }],
+        };
+      }
 
-    const candidates = response.data.candidates;
-    if (!candidates || candidates.length === 0 || !candidates[0].content) {
-      throw new Error('Gemini returned an empty response.');
+      if (jsonMode) {
+        requestBody.generationConfig.responseMimeType = 'application/json';
+      }
+
+      const response = await axios.post(url, requestBody, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 45000,
+      });
+
+      const candidates = response.data?.candidates;
+      if (!candidates || candidates.length === 0 || !candidates[0].content) {
+        throw new Error('Gemini returned an empty response.');
+      }
+
+      const outputText = candidates[0].content.parts.map((p) => p.text).join('\n');
+      return jsonMode ? cleanJsonText(outputText) : outputText;
+    } catch (error) {
+      lastError = error;
+      const errMsg = error.response?.data?.error?.message || error.message;
+      console.warn(`[Gemini API Warning] Model ${modelName} failed (${errMsg}). Trying fallback model...`);
     }
-
-    const outputText = candidates[0].content.parts.map((p) => p.text).join('\n');
-    return jsonMode ? cleanJsonText(outputText) : outputText;
-  } catch (error) {
-    if (error.response && error.response.data && error.response.data.error) {
-      const errMsg = error.response.data.error.message || 'Gemini API Error';
-      throw new Error(`Gemini API Error: ${errMsg}`);
-    }
-    throw error;
   }
+
+  throw lastError || new Error('All Gemini models failed.');
 }
 
 // -------------------------------------------------------------
 // FEATURE 2, 3, 4: AI INTERVIEW TWIN GENERATION
 // -------------------------------------------------------------
+
+const STAGE_TOPICS = [
+  'Core Role Fundamentals, OOP / Architecture & Language Internals',
+  'Concurrency, Multi-Threading, Memory Management & Performance Tuning',
+  'System Design, Database Transactions, Indexing & REST/Microservices',
+  'Real-World Production Incidents, Edge Cases, Bug Triage & Debugging',
+  'Behavioral STAR Scenario, Technical Trade-Offs & Engineering Leadership',
+];
 
 async function generateInterviewQuestion({
   role,
@@ -107,34 +126,161 @@ async function generateInterviewQuestion({
   previousQuestions = [],
   previousAnswers = [],
 }) {
-  const systemInstruction = `You are a realistic AI Interviewer acting as a "${recruiterType}" at "${company}" for a candidate applying for the "${role}" role.
-Interview Type: ${interviewType}. Difficulty: ${difficulty}.
-Important Guidelines:
-- Note: This is a simulation based on publicly available and generalized interview patterns.
-- Ask ONE clear, focused question suited for the recruiter style.
-- If previous answers had gaps or interesting claims, formulate an adaptive follow-up question or transition to the next topic.
-- Avoid repetitive questions.
-- Never diagnose mental health, emotional state, or make absolute hiring promises.
-Return ONLY valid JSON matching this schema:
+  const stageGuide = STAGE_TOPICS[questionIndex % STAGE_TOPICS.length];
+  const randomSeed = Math.random().toString(36).substring(7);
+
+  const systemInstruction = `You are a top-tier technical interviewer acting as a "${recruiterType}" at "${company}" interviewing a candidate for the "${role}" role.
+Interview Type: ${interviewType}. Difficulty: ${difficulty}. Current Stage Theme: "${stageGuide}".
+Random Session Seed: ${randomSeed}.
+
+CRITICAL QUESTION DESIGN RULES:
+- Ask ONE clear, highly engaging, scenario-driven interview question appropriate for ${role} at ${difficulty} level.
+- NEVER repeat or paraphrase any previously asked question.
+- If previous answers had strengths or gaps, formulate an adaptive follow-up or smoothly transition to the stage theme: "${stageGuide}".
+- For technical roles (e.g. Java Developer, Python, Backend, Frontend), ask deep, concrete, practical questions (e.g. for Java: Garbage Collection tuning, Spring Boot transaction management, CompletableFuture async pipelines, JPA N+1 query optimization, deadlock prevention).
+- Return ONLY valid JSON matching this schema:
 {
-  "questionText": "The question to ask the candidate",
+  "questionText": "The exact interview question to ask the candidate",
   "category": "technical | problem-solving | behavioral | architecture | background",
   "difficulty": "Easy | Medium | Hard",
   "expectedConcepts": ["concept1", "concept2", "concept3"]
 }`;
 
   const prompt = `Context:
-Candidate Role: ${role}
-Company: ${company}
+Candidate Target Role: ${role}
+Company Representation: ${company}
 Recruiter Persona: ${recruiterType}
-Difficulty: ${difficulty}
-Question Number: ${questionIndex + 1}
-Previous Questions & Answers:
-${previousQuestions.map((q, i) => `Q${i + 1}: ${q}\nA${i + 1}: ${previousAnswers[i] || 'No answer recorded'}`).join('\n\n')}
+Difficulty Level: ${difficulty}
+Question Turn: #${questionIndex + 1} of 5
+Theme Focus: ${stageGuide}
 
-Generate question #${questionIndex + 1}.`;
+History of Previous Questions & Candidate Answers:
+${previousQuestions.length > 0
+  ? previousQuestions.map((q, i) => `[Turn ${i + 1}] Q: ${q}\nA: ${previousAnswers[i] || 'No answer recorded'}`).join('\n\n')
+  : 'None (This is the opening question)'}
 
-  return await callGemini(prompt, systemInstruction, true);
+Generate a fresh, unique, and insightful question for Turn #${questionIndex + 1}.`;
+
+  return await callGemini(prompt, systemInstruction, true, { temperature: 0.85 });
+}
+
+// -------------------------------------------------------------
+// DYNAMIC MULTI-STAGE FALLBACK QUESTION GENERATOR
+// -------------------------------------------------------------
+function getDynamicFallbackQuestion(role = 'Software Engineer', questionIndex = 0, difficulty = 'Medium') {
+  const normalizedRole = role.toLowerCase();
+
+  const javaQuestions = [
+    [
+      {
+        questionText: "Welcome! To start off, could you walk me through the architecture of a complex Java/Spring Boot project you've built, focusing on how you structured your service and data access layers?",
+        category: "architecture",
+        expectedConcepts: ["Spring Boot", "Service Layer", "Dependency Injection", "Repository Pattern"],
+      },
+      {
+        questionText: "Let's dive into Java core fundamentals: How does the JVM handle Garbage Collection across Young and Old generations, and how do you diagnose memory leaks in production?",
+        category: "technical",
+        expectedConcepts: ["JVM Generational GC", "Heap Memory", "OutOfMemoryError", "VisualVM/Profiling"],
+      },
+    ],
+    [
+      {
+        questionText: "In a high-throughput Java application, how would you design a thread-safe caching mechanism or handle asynchronous parallel tasks using CompletableFuture and ExecutorService?",
+        category: "problem-solving",
+        expectedConcepts: ["CompletableFuture", "ConcurrentHashMap", "Thread Pools", "Race Condition Prevention"],
+      },
+      {
+        questionText: "What is the difference between Synchronized blocks, ReentrantLock, and Volatile variables in Java, and in what real-world concurrency scenario would you choose each?",
+        category: "technical",
+        expectedConcepts: ["ReentrantLock", "Volatile Memory Visibility", "Atomic Classes", "Deadlock Prevention"],
+      },
+    ],
+    [
+      {
+        questionText: "When working with Spring Data JPA and Hibernate, how do you identify and resolve the N+1 SELECT query problem, and how do you manage distributed transactions across microservices?",
+        category: "technical",
+        expectedConcepts: ["N+1 Problem", "JOIN FETCH", "@EntityGraph", "Saga Pattern / Distributed Transactions"],
+      },
+      {
+        questionText: "How do you design a resilient REST API in Java using Spring Boot that handles rate limiting, circuit breaking with Resilience4j, and structured error responses?",
+        category: "architecture",
+        expectedConcepts: ["Resilience4j", "Circuit Breakers", "@ControllerAdvice", "API Idempotency"],
+      },
+    ],
+    [
+      {
+        questionText: "Imagine your Java microservice in production is experiencing sudden 100% CPU spikes and thread deadlocks after a new deployment. What step-by-step methodology would you use to isolate and resolve the root cause?",
+        category: "problem-solving",
+        expectedConcepts: ["Thread Dumps", "jstack / jcmd", "CPU Profiling", "Rollback & Patch Strategy"],
+      },
+      {
+        questionText: "How do you optimize SQL database indexing and connection pooling (e.g. HikariCP) in a Java backend when query latency starts degrading under heavy concurrent traffic?",
+        category: "technical",
+        expectedConcepts: ["HikariCP Pool Tuning", "B-Tree Indexing", "Execution Plans (EXPLAIN)", "Query Batching"],
+      },
+    ],
+    [
+      {
+        questionText: "Tell me about a time when you had to balance delivering a feature quickly versus refactoring existing technical debt or addressing scalability in Java. How did you negotiate that trade-off?",
+        category: "behavioral",
+        expectedConcepts: ["STAR Method", "Technical Debt Management", "Stakeholder Communication", "Engineering Trade-offs"],
+      },
+      {
+        questionText: "Describe a situation where a major bug or production outage slipped past code review. How did you take ownership, communicate with the team, and prevent recurrence?",
+        category: "behavioral",
+        expectedConcepts: ["Root Cause Analysis", "Post-Mortem", "Automated Testing", "Accountability"],
+      },
+    ],
+  ];
+
+  const generalQuestions = [
+    [
+      {
+        questionText: `Can you walk me through the system architecture of a full-scale project you've developed as a ${role}, highlighting your core tech stack decisions?`,
+        category: "architecture",
+        expectedConcepts: ["System Architecture", "Tech Stack Trade-offs", "Data Flow"],
+      },
+    ],
+    [
+      {
+        questionText: "How do you ensure state management, data integrity, and low-latency response times when handling high-concurrency user requests?",
+        category: "technical",
+        expectedConcepts: ["Concurrency Control", "Caching", "Data Integrity"],
+      },
+    ],
+    [
+      {
+        questionText: "How do you design secure, scalable RESTful or GraphQL APIs with authentication (JWT/OAuth), input validation, and database indexing?",
+        category: "architecture",
+        expectedConcepts: ["Authentication", "API Security", "Database Query Optimization"],
+      },
+    ],
+    [
+      {
+        questionText: "Walk me through a difficult debugging scenario you encountered in production where standard unit tests did not catch the issue. How did you resolve it?",
+        category: "problem-solving",
+        expectedConcepts: ["Log Analysis", "Root Cause Analysis", "Observability"],
+      },
+    ],
+    [
+      {
+        questionText: "Tell me about a time when you received critical feedback during a technical code review or had a disagreement with a team member on architecture. How did you handle it?",
+        category: "behavioral",
+        expectedConcepts: ["Constructive Collaboration", "Communication", "Engineering Growth"],
+      },
+    ],
+  ];
+
+  const bank = normalizedRole.includes('java') ? javaQuestions : generalQuestions;
+  const stagePool = bank[questionIndex % bank.length] || generalQuestions[0];
+  const chosen = stagePool[Math.floor(Math.random() * stagePool.length)];
+
+  return {
+    questionText: chosen.questionText,
+    category: chosen.category,
+    difficulty,
+    expectedConcepts: chosen.expectedConcepts,
+  };
 }
 
 // -------------------------------------------------------------
@@ -454,4 +600,5 @@ module.exports = {
   analyzeSkillGaps,
   generateRoadmap,
   mentorChat,
+  getDynamicFallbackQuestion,
 };
